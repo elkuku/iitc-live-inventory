@@ -6,8 +6,7 @@ import * as Handlebars from 'handlebars'
 export class DialogHelper {
     public constructor(
         private pluginName: string
-    ) {
-    }
+    ) {}
 
     public getDialog(): JQuery {
         const template: HandlebarsTemplateDelegate = Handlebars.compile(dialogTemplate)

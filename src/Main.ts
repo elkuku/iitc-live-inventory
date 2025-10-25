@@ -1,4 +1,4 @@
-import * as Plugin from "iitcpluginkit";
+import * as Plugin from "iitcpluginkit"
 
 import {DialogHelper} from './DialogHelper'
 
@@ -10,10 +10,10 @@ class IitcLiveInventory implements Plugin.Class {
     private dialog: JQuery | undefined
 
     init() {
-        console.log(`KuKuLiveInventory ${VERSION}`);
+        console.log(`KuKuLiveInventory ${VERSION}`)
 
-        // eslint-disable-next-line unicorn/prefer-module, @typescript-eslint/no-require-imports
-        require('./styles.css');
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        require('./styles.css')
 
         this.dialogHelper = new DialogHelper(PLUGIN_NAME)
 
@@ -43,5 +43,5 @@ class IitcLiveInventory implements Plugin.Class {
  * use "main" to access you main class from everywhere
  * (same as window.plugin.IitcLiveInventory)
  */
-export const main = new IitcLiveInventory();
-Plugin.Register(main, "IitcLiveInventory");
+export const main = new IitcLiveInventory()
+Plugin.Register(main, "IitcLiveInventory")
