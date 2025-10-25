@@ -1,17 +1,42 @@
 import * as Plugin from "iitcpluginkit";
 
+import {DialogHelper} from './DialogHelper'
+
+const PLUGIN_NAME = 'KuKuLiveInventory'
 
 class IitcLiveInventory implements Plugin.Class {
 
+    private dialogHelper: DialogHelper
+    private dialog: JQuery | undefined
+
     init() {
-        console.log("IitcLiveInventory " + VERSION);
+        console.log(`KuKuLiveInventory ${VERSION}`);
 
         // eslint-disable-next-line unicorn/prefer-module, @typescript-eslint/no-require-imports
-        require("./styles.css");
+        require('./styles.css');
 
-        // FILL ME
+        this.dialogHelper = new DialogHelper(PLUGIN_NAME)
+
+        this.createButtons()
     }
 
+    private createButtons(): void {
+        $('#toolbox').append(
+            $('<a>', {
+                text: 'KuKuInventory',
+                click: () => this.showDialog()
+            })
+        )
+    }
+
+    private showDialog(): void {
+        if (!this.dialog) {
+            this.dialog = this.dialogHelper.getDialog()
+            this.dialog.on('dialogclose', () => {
+                this.dialog = undefined
+            })
+        }
+    }
 }
 
 /**
