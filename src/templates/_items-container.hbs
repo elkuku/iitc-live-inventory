@@ -1,0 +1,10 @@
+<table>
+    {{#eachInMap items}}
+        {{#if value}}
+        <tr>
+            <td class="icon img-{{key}}" title="{{key}}"></td>
+            <td>{{value}}</td>
+        </tr>
+        {{/if}}
+    {{/eachInMap}}
+</table>

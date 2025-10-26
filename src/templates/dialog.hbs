@@ -1,3 +1,31 @@
 <div id="{{prefix}}Container">
-    <button onclick="{{plugin}}.helloWorld()">Hello</button>
+
+    <button onclick="{{plugin}}.refresh()">Refresh</button>
+
+    <table>
+        <thead>
+        <tr>
+            <td>Resonators</td>
+            <td>Weapons</td>
+            <td>Mods</td>
+            <td>Keys</td>
+            <td>other..</td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td id="{{prefix}}-Resonators-Container"></td>
+            <td id="{{prefix}}-Weapons-Container"></td>
+            <td><div id="{{prefix}}-Mods-Container"></div></td>
+            <td><div id="{{prefix}}-Keys-Container"></div></td>
+            <td><div id="{{prefix}}-Other-Container"></div></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <label>
+        Debug
+        <textarea id="{{prefix}}-Debug" cols="30" rows="10"></textarea>
+    </label>
 </div>
+
