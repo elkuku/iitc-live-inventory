@@ -5,19 +5,22 @@ import * as Handlebars from 'handlebars'
 
 export class DialogHelper {
     public constructor(
-        private pluginName: string
+        private pluginName: string,
+        private title: string,
     ) {}
 
     public getDialog(): JQuery {
         const template: HandlebarsTemplateDelegate = Handlebars.compile(dialogTemplate)
 
-        const data = {}
-        const dialog = window.dialog({
+        const data = {
+            plugin: 'window.plugin.' + this.pluginName,
+            prefix: this.pluginName,
+        }
+
+        return window.dialog({
             id: this.pluginName,
-            title: 'Export',
+            title: this.title,
             html: template(data),
         }).parent()
-
-        return dialog
     }
 }

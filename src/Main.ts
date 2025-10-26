@@ -4,18 +4,18 @@ import {DialogHelper} from './DialogHelper'
 
 const PLUGIN_NAME = 'KuKuLiveInventory'
 
-class IitcLiveInventory implements Plugin.Class {
+class KuKuLiveInventory implements Plugin.Class {
 
     private dialogHelper: DialogHelper
     private dialog: JQuery | undefined
 
     init() {
-        console.log(`KuKuLiveInventory ${VERSION}`)
+        console.log(`${PLUGIN_NAME} ${VERSION}`)
 
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         require('./styles.css')
 
-        this.dialogHelper = new DialogHelper(PLUGIN_NAME)
+        this.dialogHelper = new DialogHelper(PLUGIN_NAME, 'Inventory')
 
         this.createButtons()
     }
@@ -37,11 +37,15 @@ class IitcLiveInventory implements Plugin.Class {
             })
         }
     }
+
+    public helloWorld() {
+        alert('Hello World!')
+    }
 }
 
 /**
  * use "main" to access you main class from everywhere
  * (same as window.plugin.IitcLiveInventory)
  */
-export const main = new IitcLiveInventory()
-Plugin.Register(main, "IitcLiveInventory")
+export const main = new KuKuLiveInventory()
+Plugin.Register(main, PLUGIN_NAME)
