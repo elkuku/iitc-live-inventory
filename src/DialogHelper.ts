@@ -44,12 +44,21 @@ export class DialogHelper {
         const resosContainer = document.getElementById(this.pluginName + '-Resonators-Container') as Element
         resosContainer.innerHTML = itemsTemplate({items: resonators})
 
-        const weaponsContainer = document.getElementById(this.pluginName + '-Weapons-Container') as Element
-        weaponsContainer.innerHTML = itemsTemplate({items: weapons})
+        const burstersContainer = document.getElementById(this.pluginName + '-Bursters-Container') as Element
+        const strikesContainer = document.getElementById(this.pluginName + '-Strikes-Container') as Element
+        const bursters = new Map<string, number>
+        const strikes = new Map<string, number>
 
+        for(const [key, value] of weapons) {
+            if (key.startsWith('EMP_BURSTER')) {
+                bursters.set(key,value)
+            }else {
+                // Viruses also go here
+                strikes.set(key,value)
+            }
+        }
 
-        const textarea = document.getElementById(this.pluginName + '-Debug') as Element
-
-        textarea.innerHTML = 'HI'
+        burstersContainer.innerHTML = itemsTemplate({items: bursters})
+        strikesContainer.innerHTML = itemsTemplate({items: strikes})
     }
 }

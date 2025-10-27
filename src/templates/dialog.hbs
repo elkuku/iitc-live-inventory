@@ -5,17 +5,27 @@
     <table>
         <thead>
         <tr>
-            <td>Resonators</td>
-            <td>Weapons</td>
-            <td>Mods</td>
-            <td>Keys</td>
-            <td>other..</td>
+            <th>Resonators</th>
+            <th colspan="2">Weapons</th>
+            <th>Mods</th>
+            <th>Keys</th>
+            <th>other..</th>
         </tr>
+        <tr>
+            <th></th>
+            <th>Bursters</th>
+            <th>Strikes</th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+
         </thead>
         <tbody>
         <tr>
             <td id="{{prefix}}-Resonators-Container"></td>
-            <td id="{{prefix}}-Weapons-Container"></td>
+            <td id="{{prefix}}-Bursters-Container"></td>
+            <td id="{{prefix}}-Strikes-Container"></td>
             <td><div id="{{prefix}}-Mods-Container"></div></td>
             <td><div id="{{prefix}}-Keys-Container"></div></td>
             <td><div id="{{prefix}}-Other-Container"></div></td>
@@ -23,9 +33,5 @@
         </tbody>
     </table>
 
-    <label>
-        Debug
-        <textarea id="{{prefix}}-Debug" cols="30" rows="10"></textarea>
-    </label>
 </div>
 
