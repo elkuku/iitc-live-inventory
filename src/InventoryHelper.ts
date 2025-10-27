@@ -251,6 +251,23 @@ export class InventoryHelper {
         return resonatorsInfo
     }
 
+
+    public async getModsInfo() {
+        const inventory = await this.getInventory()
+        const info = new Map<string, number>()
+
+        for (const mod of inventory.mods) {
+            const key = `${mod.type}-${mod.rarity}`
+            if (info.has(key)) {
+                info.set(key, info.get(key)! + 1)
+            } else {
+                info.set(key, 1)
+            }
+        }
+
+        return info
+    }
+
     private listKeysInCapsule(items: any): Inventory.KeyCapsuleItem[] {
         const keys = []
         for (const capsuleItem of items) {
@@ -283,7 +300,7 @@ export class InventoryHelper {
         } else {
             // todo REMOVE TEST DATA
             // eslint-disable-next-line @typescript-eslint/no-require-imports
-            const json = require('../testfiles/example.json')
+            const json = require('../testfiles/example1.json')
 
             items = json.result
         }

@@ -47,8 +47,9 @@ class KuKuLiveInventory implements Plugin.Class {
     public async refresh() {
         const resos = await this.inventoryHelper.getResonatorsInfo()
         const weapons = await this.inventoryHelper.getWeaponsInfo()
+        const modulators = await this.inventoryHelper.getModsInfo()
 
-        this.dialogHelper.updateDialog(resos, weapons)
+        this.dialogHelper.updateDialog(resos, weapons, modulators)
     }
 }
 
