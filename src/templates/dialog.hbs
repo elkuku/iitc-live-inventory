@@ -1,39 +1,68 @@
 <div id="{{prefix}}Container">
 
+    <div>
+        <button onclick="{{plugin}}.showPanel('Inventory')">Equipment</button>
+        <button onclick="{{plugin}}.showPanel('Keys')">Keys</button>
+        <button onclick="{{plugin}}.showPanel('Other')">Other</button>
+    </div>
+
+    <div id="{{prefix}}-Inventory-Panel" style="display: block;">
+        <table class="inventoryTable">
+            <thead>
+            <tr>
+                <th>Resonators</th>
+                <th colspan="2">Weapons</th>
+                <th colspan="3">Mods</th>
+            </tr>
+            <tr>
+                <th></th>
+                <th>Bursters</th>
+                <th>Strikes &amp; Flips</th>
+                <th>Shields</th>
+                <th>Hack</th>
+                <th>Other</th>
+            </tr>
+
+            </thead>
+            <tbody>
+            <tr>
+                <!-- Resos -->
+                <td id="{{prefix}}-Resonators-Container" class="item-container"></td>
+                <!-- Weapons -->
+                <td id="{{prefix}}-Bursters-Container" class="item-container"></td>
+                <td id="{{prefix}}-Strikes-Container" class="item-container"></td>
+                <!-- Mods -->
+                <td id="{{prefix}}-Shields-Container" class="item-container"></td>
+                <td id="{{prefix}}-HackMods-Container" class="item-container"></td>
+                <td id="{{prefix}}-OtherMods-Container" class="item-container"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="{{prefix}}-Keys-Panel" style="display: none;">
+        b
+    </div>
+    <div id="{{prefix}}-Other-Panel" style="display: none;">
+        <table>
+            <thead>
+            <tr>
+                <th colspan="3">Boosts</th>
+            </tr>
+            <tr>
+                <th>Play</th>
+                <th>Beacons</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td id="{{prefix}}-Boosts-Play-Container" class="item-container">a</td>
+                <td id="{{prefix}}-Boosts-Beacons-Container" class="item-container">a</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
     <button onclick="{{plugin}}.refresh()">Refresh</button>
-
-    <table class="inventoryTable">
-        <thead>
-        <tr>
-            <th>Resonators</th>
-            <th colspan="2">Weapons</th>
-            <th colspan="3">Mods</th>
-        </tr>
-        <tr>
-            <th></th>
-            <th>Bursters</th>
-            <th>Strikes &amp; Flips</th>
-            <th>Shields</th>
-            <th>Hack</th>
-            <th>Other</th>
-        </tr>
-
-        </thead>
-        <tbody>
-        <tr>
-            <!-- Resos -->
-            <td id="{{prefix}}-Resonators-Container" class="item-container"></td>
-            <!-- Weapons -->
-            <td id="{{prefix}}-Bursters-Container" class="item-container"></td>
-            <td id="{{prefix}}-Strikes-Container" class="item-container"></td>
-            <!-- Mods -->
-            <td id="{{prefix}}-Shields-Container" class="item-container"></td>
-            <td id="{{prefix}}-HackMods-Container" class="item-container"></td>
-            <td id="{{prefix}}-OtherMods-Container" class="item-container"></td>
-            <!-- X -->
-        </tr>
-        </tbody>
-    </table>
 
 </div>
 

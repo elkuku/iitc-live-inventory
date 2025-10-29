@@ -267,6 +267,22 @@ export class InventoryHelper {
         return info
     }
 
+
+    async getBoostsInfo() {
+        const inventory = await this.getInventory()
+        const info = new Map<string, number>()
+        for (const boost of inventory.boosts) {
+            const key = boost.type
+            if (info.has(key)) {
+                info.set(key, info.get(key)! + 1)
+            } else {
+                info.set(key, 1)
+            }
+        }
+
+        return info
+    }
+
     private listKeysInCapsule(items: IngressInventory.ContainerItem[]): Inventory.KeyCapsuleItem[] {
         const keys = []
         for (const capsuleItem of items) {

@@ -6,6 +6,8 @@ import dialogTemplate from './templates/dialog.hbs' with {type: 'text'}
 
 // @ts-expect-error "Import attributes are only supported when the --module option is set to esnext, nodenext, or preserve"
 import itemsContainerTemplate from './templates/_items-container.hbs' with {type: 'text'}
+// @ts-expect-error "Import attributes are only supported when the --module option is set to esnext, nodenext, or preserve"
+import items1ContainerTemplate from './templates/_items1-container.hbs' with {type: 'text'}
 
 Handlebars.registerHelper('eachInMap', (map: Map<any, any>, block: HelperOptions) => {
     let out = ''
@@ -40,19 +42,30 @@ export class DialogHelper {
         }).parent()
     }
 
-    updateDialog(resonators: Map<string, number>, weapons: Map<string, number>, modulators: Map<string, number>) {
+    public showPanel(name: string) {
+        for (const panel of ['Inventory', 'Keys', 'Other']) {
+            const element = document.getElementById(`${this.pluginName}-${panel}-Panel`)
+            if (element) element.style.display = 'none'
+        }
+
+        const element = document.getElementById(`${this.pluginName}-${name}-Panel`)
+        if (element) element.style.display = 'block'
+    }
+
+    updateDialog(resonators: Map<string, number>, weapons: Map<string, number>, modulators: Map<string, number>, boosts: Map<string, number>) {
         const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsContainerTemplate)
+        const items1Template: HandlebarsTemplateDelegate = Handlebars.compile(items1ContainerTemplate)
 
         // Resos
         const resosContainer = document.getElementById(this.pluginName + '-Resonators-Container') as Element
         resosContainer.innerHTML = itemsTemplate({items: resonators})
 
+        // Weapons
         const burstersContainer = document.getElementById(this.pluginName + '-Bursters-Container') as Element
         const strikesContainer = document.getElementById(this.pluginName + '-Strikes-Container') as Element
         const bursters = new Map<string, number>
         const strikes = new Map<string, number>
 
-        // Weapons
         for (const [key, value] of weapons) {
             if (key.startsWith('EMP_BURSTER')) {
                 bursters.set(key, value)
@@ -69,11 +82,9 @@ export class DialogHelper {
         const shieldsContainer = document.getElementById(this.pluginName + '-Shields-Container') as Element,
             hackModsContainer = document.getElementById(this.pluginName + '-HackMods-Container') as Element,
             otherModsContainer = document.getElementById(this.pluginName + '-OtherMods-Container') as Element,
-
             shields = new Map<string, number>,
             hackMods = new Map<string, number>,
             otherMods = new Map<string, number>,
-
             otherModsTypes = [
                 'FORCE_AMP-RARE', 'TURRET-RARE',
                 'LINK_AMPLIFIER-RARE', 'ULTRA_LINK_AMP-VERY_RARE',
@@ -107,6 +118,27 @@ export class DialogHelper {
         otherModsContainer.innerHTML = itemsTemplate({
             items: this.sortMapByKey(otherMods, otherModsTypes)
         })
+
+        // Boosts
+        const boostsPlayContainer = document.getElementById(this.pluginName + '-Boosts-Play-Container') as Element,
+            boostsBeaconsContainer = document.getElementById(this.pluginName + '-Boosts-Beacons-Container') as Element,
+            play = new Map<string, number>,
+            beacons = new Map<string, number>,
+            playTypes = ['FRACK', 'BB_BATTLE', 'FW_ENL', 'FW_RES'],
+            beaconsTypes = new Set(['MEET',])
+
+        for (const [key, value] of boosts) {
+            if (playTypes.includes(key)) {
+                play.set(key, value)
+            } else if (beaconsTypes.has(key)) {
+                beacons.set(key, value)
+            } else {
+                console.warn(`Unknown boost: ${key}`)
+            }
+        }
+
+        boostsPlayContainer.innerHTML = items1Template({items: this.sortMapByKey(play, playTypes)})
+        boostsBeaconsContainer.innerHTML = items1Template({items: beacons})
     }
 
     private sortMapByCompoundKey<T>(
@@ -131,7 +163,6 @@ export class DialogHelper {
             )
         )
     }
-
 
     private sortMapByKey<T>(map: Map<string, T>, order: string[]): Map<string, any> {
         return new Map(

@@ -3,9 +3,9 @@ import * as Plugin from "iitcpluginkit"
 import {DialogHelper} from './DialogHelper'
 import {InventoryHelper} from './InventoryHelper'
 
-const PLUGIN_NAME = 'KuKuLiveInventory'
+const PLUGIN_NAME = 'KuKuInventory'
 
-class KuKuLiveInventory implements Plugin.Class {
+class KuKuInventory implements Plugin.Class {
 
     private dialogHelper: DialogHelper
     private dialog: JQuery | undefined
@@ -44,18 +44,21 @@ class KuKuLiveInventory implements Plugin.Class {
         }
     }
 
+    public showPanel(name:string) {
+        this.dialogHelper.showPanel(name)
+    }
+
     public async refresh() {
         const resos = await this.inventoryHelper.getResonatorsInfo()
         const weapons = await this.inventoryHelper.getWeaponsInfo()
         const modulators = await this.inventoryHelper.getModsInfo()
 
-        this.dialogHelper.updateDialog(resos, weapons, modulators)
+        const boosts = await this.inventoryHelper.getBoostsInfo()
+
+        this.dialogHelper.updateDialog(resos, weapons, modulators, boosts)
     }
 }
 
-/**
- * use "main" to access you main class from everywhere
- * (same as window.plugin.IitcLiveInventory)
- */
-export const main = new KuKuLiveInventory()
+export const main = new KuKuInventory()
+
 Plugin.Register(main, PLUGIN_NAME)
