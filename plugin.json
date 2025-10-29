@@ -1,9 +1,9 @@
 {
-  "name": "IITC plugin: KuKuLiveInventory",
-  "id": "iitc_plugin_KuKuLiveInventory",
+  "name": "IITC plugin: KuKuInventory",
+  "id": "iitc_plugin_KuKuInventory",
   "category": "Misc",
   "description": "Display inventory information",
-  "author": "EisFrei, DanielOndiordna, nikp3h",
+  "author": "nikp3h",
   "entry": "src/Main.ts",
   "minimize": false,
   "changelog": ""

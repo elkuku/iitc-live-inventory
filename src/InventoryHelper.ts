@@ -1,4 +1,5 @@
-import {Inventory, KeyInfo} from "../types/Types"
+import {Inventory, KeyInfo} from '../types/Types'
+import {IngressInventory} from '../types/IngressInventory'
 
 export class InventoryHelper {
     private inventory: Inventory.Items
@@ -18,11 +19,11 @@ export class InventoryHelper {
         }
 
         try {
-            const items = await this.fetchInventory()
+            const items: IngressInventory.Items[] = await this.fetchInventory()
 
-            for (const item of items) {
-                // item is a #/&§$%%$ array...
-                const object = item[2]
+            for (const whyIsThisAnArray of items) {
+                // This is a #/&§$%%$ array...
+                const object = whyIsThisAnArray[2]
 
                 let type = '', designation = '', level = 0
 
@@ -34,20 +35,17 @@ export class InventoryHelper {
                 } else if (Object.prototype.hasOwnProperty.call(object, 'modResource')) {
                     type = 'modResource'
                 } else {
-                    console.warn('No resource', object)
+                    console.warn('Unknown resource type in object', object)
                 }
 
                 if (Object.prototype.hasOwnProperty.call(object, 'timedPowerupResource')) {
                     designation = object.timedPowerupResource.designation
-                } else {
-                    //console.log('NO timedPowerupResource', object)
                 }
 
                 switch (type) {
-                    case 'modResource':
-                        inventory.mods.push({
-                            type: object.modResource.resourceType,
-                            rarity: object.modResource.rarity,
+                    case 'EMITTER_A': // This is a so-called "resonator"
+                        inventory.resonators.push({
+                            level: level
                         })
 
                         break
@@ -87,9 +85,10 @@ export class InventoryHelper {
                         })
 
                         break
-                    case 'EMITTER_A':
-                        inventory.resonators.push({
-                            level: level
+                    case 'modResource':
+                        inventory.mods.push({
+                            type: object.modResource.resourceType,
+                            rarity: object.modResource.rarity,
                         })
 
                         break
@@ -97,11 +96,11 @@ export class InventoryHelper {
                     case 'KINETIC_CAPSULE':
                     case 'POWER_CUBE':
                     case 'BOOSTED_POWER_CUBE': // hyper cube
-                    case 'PLAYER_POWERUP':// apex
-                    case 'ENTITLEMENT':// ???
+                    case 'PLAYER_POWERUP': // apex
+                    case 'ENTITLEMENT': // ???
                     case 'DRONE':
                         // todo process those items (?)
-                        //console.log(`todo type: ${type}`, object)
+                        // console.log(`todo type: ${type}`, object)
                         break
                     default:
                         console.warn(`Unknown type: ${type}`, object)
@@ -237,7 +236,7 @@ export class InventoryHelper {
             }
         }
 
-        for (const [k, v] of [...resonatorsInfo.entries()].sort(
+        for (const [k, v] of [...resonatorsInfo.entries()].toSorted(
             ([a], [b]) => {
                 const numA = parseInt((/\d+$/.exec(a))?.[0] ?? '0', 10)
                 const numB = parseInt((/\d+$/.exec(b))?.[0] ?? '0', 10)
@@ -256,8 +255,8 @@ export class InventoryHelper {
         const inventory = await this.getInventory()
         const info = new Map<string, number>()
 
-        for (const mod of inventory.mods) {
-            const key = `${mod.type}-${mod.rarity}`
+        for (const modulator of inventory.mods) {
+            const key = `${modulator.type}-${modulator.rarity}`
             if (info.has(key)) {
                 info.set(key, info.get(key)! + 1)
             } else {
@@ -268,7 +267,7 @@ export class InventoryHelper {
         return info
     }
 
-    private listKeysInCapsule(items: any): Inventory.KeyCapsuleItem[] {
+    private listKeysInCapsule(items: IngressInventory.ContainerItem[]): Inventory.KeyCapsuleItem[] {
         const keys = []
         for (const capsuleItem of items) {
             const coupler = capsuleItem.exampleGameEntity[2].portalCoupler
@@ -287,10 +286,10 @@ export class InventoryHelper {
         return keys
     }
 
-    private async fetchInventory() {
+    private async fetchInventory(): Promise<IngressInventory.Items[]> {
         const isEnabled = false // todo load data from cache
 
-        let items: any[]
+        let items: IngressInventory.Items[]
 
         if (isEnabled) {
             const response = await this.postAjax('getInventory', {lastQueryTimestamp: 0})
@@ -305,7 +304,6 @@ export class InventoryHelper {
             items = json.result
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return items
     }
 

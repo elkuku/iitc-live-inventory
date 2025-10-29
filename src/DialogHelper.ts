@@ -94,50 +94,48 @@ export class DialogHelper {
                 otherMods.set(key, value)
             } else {
                 console.warn(`Unknown modulator: ${key}`)
-                // Viruses also go here
-                strikes.set(key, value)
+                otherMods.set(key, value)
             }
         }
 
-        this.sortMapByCompoundKey(shields, ['RES_SHIELD', 'EXTRA_SHIELD'], rarities)
-        shieldsContainer.innerHTML = itemsTemplate({items: shields})
-
-        this.sortMapByCompoundKey(hackMods, ['HEATSINK', 'MULTIHACK'], rarities)
-        hackModsContainer.innerHTML = itemsTemplate({items: hackMods})
-
-        otherModsContainer.innerHTML = itemsTemplate({items: this.sortMapByKey(otherMods, otherModsTypes)})
-
-
+        shieldsContainer.innerHTML = itemsTemplate({
+            items: this.sortMapByCompoundKey(shields, ['RES_SHIELD', 'EXTRA_SHIELD'], rarities)
+        })
+        hackModsContainer.innerHTML = itemsTemplate({
+            items: this.sortMapByCompoundKey(hackMods, ['HEATSINK', 'MULTIHACK'], rarities)
+        })
+        otherModsContainer.innerHTML = itemsTemplate({
+            items: this.sortMapByKey(otherMods, otherModsTypes)
+        })
     }
 
     private sortMapByCompoundKey<T>(
         map: Map<string, T>,
         orderPart1: string[],
         orderPart2: string[]
-    ): void {
-        const sortedEntries = [...map.entries()].sort(([keyA], [keyB]) => {
-            const [partA1, partA2] = keyA.split('-')
-            const [partB1, partB2] = keyB.split('-')
+    ): Map<string, any> {
+        return new Map(
+            [...map.entries()].toSorted(
+                ([keyA], [keyB]) => {
+                    const [partA1, partA2] = keyA.split('-')
+                    const [partB1, partB2] = keyB.split('-')
 
-            const order1Diff = orderPart1.indexOf(partA1) - orderPart1.indexOf(partB1)
-            if (order1Diff !== 0) {
+                    const order1Diff = orderPart1.indexOf(partA1) - orderPart1.indexOf(partB1)
+                    if (order1Diff !== 0) {
 
-                return order1Diff
-            }
+                        return order1Diff
+                    }
 
-            return orderPart2.indexOf(partA2) - orderPart2.indexOf(partB2)
-        })
-
-        map.clear()
-        for (const [key, value] of sortedEntries) {
-            map.set(key, value)
-        }
+                    return orderPart2.indexOf(partA2) - orderPart2.indexOf(partB2)
+                }
+            )
+        )
     }
 
 
-    private sortMapByKey(map: Map<string, any>, order: string[]): Map<string, any> {
+    private sortMapByKey<T>(map: Map<string, T>, order: string[]): Map<string, any> {
         return new Map(
-            [...map.entries()].sort(
+            [...map.entries()].toSorted(
                 ([a], [b]) => order.indexOf(a) - order.indexOf(b)
             )
         )
