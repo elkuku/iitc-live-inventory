@@ -11,6 +11,10 @@ table.inventoryTable td.item-container {
     vertical-align: top;
 }
 
+span.cnt, td.cnt {
+    color: lime;
+}
+
 .icon {
     min-width: 64px;
     height: 64px;

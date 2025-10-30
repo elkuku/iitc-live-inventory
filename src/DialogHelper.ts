@@ -9,14 +9,21 @@ import itemsContainerTemplate from './templates/_items-container.hbs' with {type
 // @ts-expect-error "Import attributes are only supported when the --module option is set to esnext, nodenext, or preserve"
 import items1ContainerTemplate from './templates/_items1-container.hbs' with {type: 'text'}
 
-Handlebars.registerHelper('eachInMap', (map: Map<any, any>, block: HelperOptions) => {
-    let out = ''
-    if (map && map instanceof Map) {
-        for (const [key, value] of map) {
-            out += block.fn({key, value})
+import {translateKey} from "../types/key-translations"
+
+Handlebars.registerHelper({
+    eachInMap: (map: Map<any, any>, block: HelperOptions) => {
+        let out = ''
+        if (map && map instanceof Map) {
+            for (const [key, value] of map) {
+                out += block.fn({key, value})
+            }
         }
+        return out
+    },
+    translateKey: (key: string) => {
+        return translateKey(key)
     }
-    return out
 })
 
 export class DialogHelper {
@@ -52,33 +59,76 @@ export class DialogHelper {
         if (element) element.style.display = 'block'
     }
 
-    updateDialog(resonators: Map<string, number>, weapons: Map<string, number>, modulators: Map<string, number>, boosts: Map<string, number>) {
-        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsContainerTemplate)
-        const items1Template: HandlebarsTemplateDelegate = Handlebars.compile(items1ContainerTemplate)
+    public updateDialog(resonators: Map<string, number>, weapons: Map<string, number>, modulators: Map<string, number>, boosts: Map<string, number>) {
+        let total = 0
 
-        // Resos
+        total += this.processResos(resonators)
+        total += this.processWeapons(weapons)
+        total += this.processModulators(modulators)
+        total += this.processBoosts(boosts)
+
+        this.UpdateCountField('cntTotal', total)
+    }
+
+    private processResos(resonators: Map<string, number>) {
+        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsContainerTemplate)
+        let cntResos = 0
+
         const resosContainer = document.getElementById(this.pluginName + '-Resonators-Container') as Element
         resosContainer.innerHTML = itemsTemplate({items: resonators})
 
-        // Weapons
+        for (const count of resonators.values()) {
+            cntResos += count
+        }
+
+        this.UpdateCountField('cntResonators', cntResos)
+
+        return cntResos
+    }
+
+    private processWeapons(weapons: Map<string, number>) {
+        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsContainerTemplate)
+
         const burstersContainer = document.getElementById(this.pluginName + '-Bursters-Container') as Element
         const strikesContainer = document.getElementById(this.pluginName + '-Strikes-Container') as Element
         const bursters = new Map<string, number>
         const strikes = new Map<string, number>
 
+        let cntBursters = 0, cntStrikes = 0, cntFlips = 0
+
         for (const [key, value] of weapons) {
             if (key.startsWith('EMP_BURSTER')) {
                 bursters.set(key, value)
-            } else {
+                cntBursters += value
+            } else if (key.startsWith('ULTRA_STRIKE')) {
+                strikes.set(key, value)
+                cntStrikes += value
+            } else if (['ADA-0', 'JARVIS-0'].includes(key)) {
                 // Viruses also go here
                 strikes.set(key, value)
+                cntFlips += value
+            } else {
+                console.warn('Unknown weapon', key)
             }
         }
+
+        const total = cntBursters + cntStrikes + cntFlips
 
         burstersContainer.innerHTML = itemsTemplate({items: bursters})
         strikesContainer.innerHTML = itemsTemplate({items: strikes})
 
-        // Mods
+        this.UpdateCountField('cntBursters', cntBursters)
+        this.UpdateCountField('cntStrikes', cntStrikes)
+        this.UpdateCountField('cntFlips', cntFlips)
+
+        this.UpdateCountField('cntWeapons', total)
+
+        return total
+    }
+
+    private processModulators(modulators: Map<string, number>) {
+        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsContainerTemplate)
+
         const shieldsContainer = document.getElementById(this.pluginName + '-Shields-Container') as Element,
             hackModsContainer = document.getElementById(this.pluginName + '-HackMods-Container') as Element,
             otherModsContainer = document.getElementById(this.pluginName + '-OtherMods-Container') as Element,
@@ -92,11 +142,14 @@ export class DialogHelper {
             ],
             rarities = ['COMMON', 'RARE', 'VERY_RARE']
 
+        let cntShields = 0
+
         for (const [key, value] of modulators) {
             if (key.startsWith('RES_SHIELD')
                 || key.startsWith('EXTRA_SHIELD')
             ) {
                 shields.set(key, value)
+                cntShields += value
             } else if (key.startsWith('HEATSINK')
                 || key.startsWith('MULTIHACK')
             ) {
@@ -119,13 +172,24 @@ export class DialogHelper {
             items: this.sortMapByKey(otherMods, otherModsTypes)
         })
 
-        // Boosts
+        const total = cntShields
+
+        this.UpdateCountField('cntModShields', cntShields)
+
+        this.UpdateCountField('cntMods', total)
+
+        return total
+    }
+
+    private processBoosts(boosts: Map<string, number>) {
+        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(items1ContainerTemplate)//todo TEST
+
         const boostsPlayContainer = document.getElementById(this.pluginName + '-Boosts-Play-Container') as Element,
             boostsBeaconsContainer = document.getElementById(this.pluginName + '-Boosts-Beacons-Container') as Element,
             play = new Map<string, number>,
             beacons = new Map<string, number>,
             playTypes = ['FRACK', 'BB_BATTLE', 'FW_ENL', 'FW_RES'],
-            beaconsTypes = new Set(['MEET',])
+            beaconsTypes = new Set(['MEET', 'TOASTY', 'NIA', 'BN_PEACE', 'BN_BLM', 'RES', 'ENL'])
 
         for (const [key, value] of boosts) {
             if (playTypes.includes(key)) {
@@ -137,8 +201,31 @@ export class DialogHelper {
             }
         }
 
-        boostsPlayContainer.innerHTML = items1Template({items: this.sortMapByKey(play, playTypes)})
-        boostsBeaconsContainer.innerHTML = items1Template({items: beacons})
+        boostsPlayContainer.innerHTML = itemsTemplate({items: this.sortMapByKey(play, playTypes)})
+        boostsBeaconsContainer.innerHTML = itemsTemplate({items: beacons})
+
+        return 0
+    }
+
+    private UpdateCountField(name: string, count: number) {
+        const element = document.getElementById(this.pluginName + '-' + name) as Element
+
+        if (element) {
+            element.innerHTML = count.toString()
+        } else {
+            console.warn(`Unknown countField: ${name}`)
+        }
+    }
+
+    private sortMapByKey<T>(
+        map: Map<string, T>,
+        order: string[]
+    ): Map<string, any> {
+        return new Map(
+            [...map.entries()].toSorted(
+                ([a], [b]) => order.indexOf(a) - order.indexOf(b)
+            )
+        )
     }
 
     private sortMapByCompoundKey<T>(
@@ -160,14 +247,6 @@ export class DialogHelper {
 
                     return orderPart2.indexOf(partA2) - orderPart2.indexOf(partB2)
                 }
-            )
-        )
-    }
-
-    private sortMapByKey<T>(map: Map<string, T>, order: string[]): Map<string, any> {
-        return new Map(
-            [...map.entries()].toSorted(
-                ([a], [b]) => order.indexOf(a) - order.indexOf(b)
             )
         )
     }

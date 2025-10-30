@@ -2,8 +2,8 @@
     {{#eachInMap items}}
         {{#if value}}
         <tr>
-            <td class="icon img-{{key}}" title="{{key}}">{{key}}</td>
-            <td>{{value}}</td>
+            <td title="{{key}}">{{translateKey key}}</td>
+            <td class="cnt">{{value}}</td>
         </tr>
         {{/if}}
     {{/eachInMap}}

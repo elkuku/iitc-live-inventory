@@ -1,26 +1,28 @@
 <div id="{{prefix}}Container">
 
+    Total: <span class="cnt" id="{{prefix}}-cntTotal"></span>
+
     <div>
-        <button onclick="{{plugin}}.showPanel('Inventory')">Equipment</button>
-        <button onclick="{{plugin}}.showPanel('Keys')">Keys</button>
-        <button onclick="{{plugin}}.showPanel('Other')">Other</button>
+        <button onclick="{{plugin}}.showPanel('Inventory')">Equipment <span class="cnt" id="{{prefix}}-cntEquipment"></span></button>
+        <button onclick="{{plugin}}.showPanel('Keys')">Keys <span class="cnt" id="{{prefix}}-cntKeys"></span></button>
+        <button onclick="{{plugin}}.showPanel('Other')">Other <span class="cnt" id="{{prefix}}-cntOther"></span></button>
     </div>
 
     <div id="{{prefix}}-Inventory-Panel" style="display: block;">
         <table class="inventoryTable">
             <thead>
             <tr>
-                <th>Resonators</th>
-                <th colspan="2">Weapons</th>
-                <th colspan="3">Mods</th>
+                <th>Resonators <span class="cnt" id="{{prefix}}-cntResonators"></span></th>
+                <th colspan="2">Weapons <span class="cnt" id="{{prefix}}-cntWeapons"></span></th>
+                <th colspan="3">Mods <span class="cnt" id="{{prefix}}-cntMods"></span></th>
             </tr>
             <tr>
                 <th></th>
-                <th>Bursters</th>
-                <th>Strikes &amp; Flips</th>
-                <th>Shields</th>
-                <th>Hack</th>
-                <th>Other</th>
+                <th>Bursters <span class="cnt" id="{{prefix}}-cntBursters"></span></th>
+                <th>Strikes <span class="cnt" id="{{prefix}}-cntStrikes"></span> &amp; Flips <span class="cnt" id="{{prefix}}-cntFlips"></span></th>
+                <th>Shields <span class="cnt" id="{{prefix}}-cntModShields"></span></th>
+                <th>Hack <span class="cnt" id="{{prefix}}-cntModHack"></span></th>
+                <th>Other <span class="cnt" id="{{prefix}}-cntModOther"></span></th>
             </tr>
 
             </thead>
