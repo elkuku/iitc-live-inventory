@@ -1,10 +1,10 @@
 <table>
     {{#eachInMap items}}
         {{#if value}}
-        <tr>
-            <td title="{{key}}">{{translateKey key}}</td>
-            <td class="cnt">{{value}}</td>
-        </tr>
+            <tr>
+                <td title="{{key}}" class="label-container">{{translateKey key}}</td>
+                <td class="cnt count-container">{{value}}</td>
+            </tr>
         {{/if}}
     {{/eachInMap}}
 </table>

@@ -1,6 +1,7 @@
 table.inventoryTable th {
     text-align: center;
 }
+
 table.inventoryTable td {
     text-align: center;
     vertical-align: middle
@@ -8,6 +9,16 @@ table.inventoryTable td {
 
 table.inventoryTable td.item-container {
     text-align: center;
+    vertical-align: top;
+}
+
+table.inventoryTable td.label-container {
+    text-align: left;
+    vertical-align: top;
+}
+
+table.inventoryTable td.count-container {
+    text-align: right;
     vertical-align: top;
 }
 
@@ -189,6 +200,7 @@ span.cnt, td.cnt {
 .img-TRANSMUTER_ATTACK-VERY_RARE {
     background-image: url('/img/ico/ITO_EN_Transmuter_Negative.png');
 }
+
 .img-TRANSMUTER_DEFENSE-VERY_RARE {
     background-image: url('/img/ico/ITO_EN_Transmuter_Positive.png');
 }

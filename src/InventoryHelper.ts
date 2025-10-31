@@ -14,6 +14,7 @@ export class InventoryHelper {
             weapons: [],
             mods: [],
             keys: [],
+            cubes: [],
             boosts: [],
             keyCapsules: [],
         }
@@ -79,6 +80,15 @@ export class InventoryHelper {
                         })
 
                         break
+                    case 'PLAYER_POWERUP': // apex
+                        if (object.playerPowerupResource.playerPowerupEnum === 'APEX') {
+                            inventory.boosts.push({
+                                type: 'APEX'
+                            })
+                        } else {
+                            console.warn('Unknown PLAYER_POWERUP', object)
+                        }
+                        break
                     case 'PORTAL_POWERUP':
                         inventory.boosts.push({
                             type: designation
@@ -92,11 +102,18 @@ export class InventoryHelper {
                         })
 
                         break
+                    case 'POWER_CUBE':
+                        inventory.cubes.push({
+                            level: level
+                        })
+                        break
+                    case 'BOOSTED_POWER_CUBE': // hyper cube
+                        inventory.cubes.push({
+                            level: 9
+                        })
+                        break
                     case 'CAPSULE': // TODO process capsules
                     case 'KINETIC_CAPSULE':
-                    case 'POWER_CUBE':
-                    case 'BOOSTED_POWER_CUBE': // hyper cube
-                    case 'PLAYER_POWERUP': // apex
                     case 'ENTITLEMENT': // ???
                     case 'DRONE':
                         // todo process those items (?)
@@ -268,7 +285,7 @@ export class InventoryHelper {
     }
 
 
-    async getBoostsInfo() {
+    public async getBoostsInfo() {
         const inventory = await this.getInventory()
         const info = new Map<string, number>()
         for (const boost of inventory.boosts) {
@@ -278,6 +295,33 @@ export class InventoryHelper {
             } else {
                 info.set(key, 1)
             }
+        }
+
+        return info
+    }
+
+    public async getCubesInfo() {
+        const inventory = await this.getInventory()
+        const info = new Map<string, number>()
+
+        for (const cube of inventory.cubes) {
+            const key = `POWER_CUBE-${cube.level}`
+            if (info.has(key)) {
+                info.set(key, info.get(key)! + 1)
+            } else {
+                info.set(key, 1)
+            }
+        }
+
+        for (const [k, v] of [...info.entries()].toSorted(
+            ([a], [b]) => {
+                const numA = parseInt(a.slice(-1))
+                const numB = parseInt(b.slice(-1))
+                return numA - numB
+            }
+        )) {
+            info.delete(k)
+            info.set(k, v)
         }
 
         return info

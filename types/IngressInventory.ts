@@ -3,6 +3,7 @@ export declare namespace IngressInventory {
         resource: Resource
         resourceWithLevels: ResourceWithLevels
         timedPowerupResource: TimedPowerupResource
+        playerPowerupResource: PlayerPowerupResource
         modResource: ModResource
         flipCard: FlipCard
         portalCoupler: PortalCoupler
@@ -27,6 +28,10 @@ export declare namespace IngressInventory {
         designation: string // eg FW_ENL
         multiplier: number // ? eg 0
         multiplierE6: number // ? eg 1000000
+    }
+
+    interface PlayerPowerupResource {
+        playerPowerupEnum: string
     }
 
     interface Moniker {

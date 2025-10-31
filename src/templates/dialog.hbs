@@ -3,9 +3,15 @@
     Total: <span class="cnt" id="{{prefix}}-cntTotal"></span>
 
     <div>
-        <button onclick="{{plugin}}.showPanel('Inventory')">Equipment <span class="cnt" id="{{prefix}}-cntEquipment"></span></button>
-        <button onclick="{{plugin}}.showPanel('Keys')">Keys <span class="cnt" id="{{prefix}}-cntKeys"></span></button>
-        <button onclick="{{plugin}}.showPanel('Other')">Other <span class="cnt" id="{{prefix}}-cntOther"></span></button>
+        <button onclick="{{plugin}}.showPanel('Inventory')">
+            Equipment <span class="cnt" id="{{prefix}}-cntEquipment"></span>
+        </button>
+        <button onclick="{{plugin}}.showPanel('Keys')">
+            Keys <span class="cnt" id="{{prefix}}-cntKeys"></span>
+        </button>
+        <button onclick="{{plugin}}.showPanel('Other')">
+            Other <span class="cnt" id="{{prefix}}-cntOther"></span>
+        </button>
     </div>
 
     <div id="{{prefix}}-Inventory-Panel" style="display: block;">
@@ -19,7 +25,10 @@
             <tr>
                 <th></th>
                 <th>Bursters <span class="cnt" id="{{prefix}}-cntBursters"></span></th>
-                <th>Strikes <span class="cnt" id="{{prefix}}-cntStrikes"></span> &amp; Flips <span class="cnt" id="{{prefix}}-cntFlips"></span></th>
+                <th>
+                    Strikes <span class="cnt" id="{{prefix}}-cntStrikes"></span>
+                    &amp; Flips <span class="cnt" id="{{prefix}}-cntFlips"></span>
+                </th>
                 <th>Shields <span class="cnt" id="{{prefix}}-cntModShields"></span></th>
                 <th>Hack <span class="cnt" id="{{prefix}}-cntModHack"></span></th>
                 <th>Other <span class="cnt" id="{{prefix}}-cntModOther"></span></th>
@@ -42,23 +51,26 @@
         </table>
     </div>
     <div id="{{prefix}}-Keys-Panel" style="display: none;">
-        b
+        TODO: keys
     </div>
     <div id="{{prefix}}-Other-Panel" style="display: none;">
-        <table>
+        <table class="inventoryTable">
             <thead>
             <tr>
-                <th colspan="3">Boosts</th>
+                <th>Cubes <span class="cnt" id="{{prefix}}-cntCubes"></span></th>
+                <th colspan="2">Boosts <span class="cnt" id="{{prefix}}-cntBoosts"></span></th>
             </tr>
             <tr>
-                <th>Play</th>
-                <th>Beacons</th>
+                <th></th>
+                <th>Play <span class="cnt" id="{{prefix}}-cntBoostsPlay"></span></th>
+                <th>Beacons <span class="cnt" id="{{prefix}}-cntBoostsBeacons"></span></th>
             </tr>
             </thead>
             <tbody>
             <tr>
-                <td id="{{prefix}}-Boosts-Play-Container" class="item-container">a</td>
-                <td id="{{prefix}}-Boosts-Beacons-Container" class="item-container">a</td>
+                <td id="{{prefix}}-Cubes-Container" class="item-container"></td>
+                <td id="{{prefix}}-Boosts-Play-Container" class="item-container"></td>
+                <td id="{{prefix}}-Boosts-Beacons-Container" class="item-container"></td>
             </tr>
             </tbody>
         </table>

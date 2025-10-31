@@ -9,7 +9,8 @@ import itemsContainerTemplate from './templates/_items-container.hbs' with {type
 // @ts-expect-error "Import attributes are only supported when the --module option is set to esnext, nodenext, or preserve"
 import items1ContainerTemplate from './templates/_items1-container.hbs' with {type: 'text'}
 
-import {translateKey} from "../types/key-translations"
+import {translateKey} from '../types/key-translations'
+import {InventoryHelper} from './InventoryHelper'
 
 Handlebars.registerHelper({
     eachInMap: (map: Map<any, any>, block: HelperOptions) => {
@@ -27,10 +28,15 @@ Handlebars.registerHelper({
 })
 
 export class DialogHelper {
+
+    private inventoryHelper: InventoryHelper
+
     public constructor(
         private pluginName: string,
         private title: string,
-    ) {}
+    ) {
+        this.inventoryHelper = new InventoryHelper()
+    }
 
     public getDialog(): JQuery {
         const template: HandlebarsTemplateDelegate = Handlebars.compile(dialogTemplate)
@@ -59,13 +65,32 @@ export class DialogHelper {
         if (element) element.style.display = 'block'
     }
 
-    public updateDialog(resonators: Map<string, number>, weapons: Map<string, number>, modulators: Map<string, number>, boosts: Map<string, number>) {
-        let total = 0
+    public async updateDialog() {
+        console.log(await this.inventoryHelper.getInventory())
 
-        total += this.processResos(resonators)
-        total += this.processWeapons(weapons)
-        total += this.processModulators(modulators)
-        total += this.processBoosts(boosts)
+        const resonators = await this.inventoryHelper.getResonatorsInfo()
+        const weapons = await this.inventoryHelper.getWeaponsInfo()
+        const modulators = await this.inventoryHelper.getModsInfo()
+
+        const cubes = await this.inventoryHelper.getCubesInfo()
+        const boosts = await this.inventoryHelper.getBoostsInfo()
+
+        let total = 0, cntEquipment = 0, cntKeys = 0, cntOther = 0
+
+        cntEquipment += this.processResos(resonators)
+        cntEquipment += this.processWeapons(weapons)
+        cntEquipment += this.processModulators(modulators)
+
+        cntKeys += 0
+
+        cntOther += this.processCubes(cubes)
+        cntOther += this.processBoosts(boosts)
+
+        total = cntEquipment + cntKeys + cntOther
+
+        this.UpdateCountField('cntEquipment', cntEquipment)
+        this.UpdateCountField('cntKeys', cntKeys)
+        this.UpdateCountField('cntOther', cntOther)
 
         this.UpdateCountField('cntTotal', total)
     }
@@ -142,7 +167,7 @@ export class DialogHelper {
             ],
             rarities = ['COMMON', 'RARE', 'VERY_RARE']
 
-        let cntShields = 0
+        let cntShields = 0, cntHack = 0, cntOther = 0
 
         for (const [key, value] of modulators) {
             if (key.startsWith('RES_SHIELD')
@@ -154,11 +179,14 @@ export class DialogHelper {
                 || key.startsWith('MULTIHACK')
             ) {
                 hackMods.set(key, value)
+                cntHack += value
             } else if (otherModsTypes.includes(key)) {
                 otherMods.set(key, value)
+                cntOther += value
             } else {
                 console.warn(`Unknown modulator: ${key}`)
                 otherMods.set(key, value)
+                cntOther += value
             }
         }
 
@@ -172,9 +200,11 @@ export class DialogHelper {
             items: this.sortMapByKey(otherMods, otherModsTypes)
         })
 
-        const total = cntShields
+        const total = cntShields + cntHack + cntOther
 
         this.UpdateCountField('cntModShields', cntShields)
+        this.UpdateCountField('cntModHack', cntHack)
+        this.UpdateCountField('cntModOther', cntOther)
 
         this.UpdateCountField('cntMods', total)
 
@@ -188,24 +218,53 @@ export class DialogHelper {
             boostsBeaconsContainer = document.getElementById(this.pluginName + '-Boosts-Beacons-Container') as Element,
             play = new Map<string, number>,
             beacons = new Map<string, number>,
-            playTypes = ['FRACK', 'BB_BATTLE', 'FW_ENL', 'FW_RES'],
+            playTypes = ['FRACK', 'APEX', 'BB_BATTLE', 'FW_ENL', 'FW_RES'],
             beaconsTypes = new Set(['MEET', 'TOASTY', 'NIA', 'BN_PEACE', 'BN_BLM', 'RES', 'ENL'])
+
+        let total = 0, cntPlay = 0, cntBeacons = 0
 
         for (const [key, value] of boosts) {
             if (playTypes.includes(key)) {
                 play.set(key, value)
+                cntPlay += value
             } else if (beaconsTypes.has(key)) {
                 beacons.set(key, value)
+                cntBeacons += value
             } else {
                 console.warn(`Unknown boost: ${key}`)
             }
         }
 
+        total += cntPlay + cntBeacons
         boostsPlayContainer.innerHTML = itemsTemplate({items: this.sortMapByKey(play, playTypes)})
         boostsBeaconsContainer.innerHTML = itemsTemplate({items: beacons})
 
-        return 0
+        this.UpdateCountField('cntBoostsPlay', cntPlay)
+        this.UpdateCountField('cntBoostsBeacons', cntBeacons)
+
+        this.UpdateCountField('cntBoosts', total)
+
+        return total
     }
+
+
+    private processCubes(cubes: Map<string, number>) {
+        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(items1ContainerTemplate)//todo TEST
+
+        const cubesContainer = document.getElementById(this.pluginName + '-Cubes-Container') as Element
+        cubesContainer.innerHTML = itemsTemplate({items: cubes})
+
+        let count = 0
+
+        for (const cnt of cubes.values()) {
+            count += cnt
+        }
+
+        this.UpdateCountField('cntCubes', count)
+
+        return count
+    }
+
 
     private UpdateCountField(name: string, count: number) {
         const element = document.getElementById(this.pluginName + '-' + name) as Element

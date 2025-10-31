@@ -5,6 +5,7 @@ export namespace Inventory {
         weapons: Weapon[]
         mods: Modulator[]
         keys: Key[]
+        cubes: Cube[]
         boosts: Boost[]
         keyCapsules: KeyCapsule[]
     }
@@ -30,6 +31,10 @@ export namespace Inventory {
     export interface Key {
         guid: string
         title: string
+    }
+
+    export interface Cube {
+        level: number
     }
 
     export interface KeyCapsule {

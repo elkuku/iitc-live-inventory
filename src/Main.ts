@@ -1,7 +1,6 @@
 import * as Plugin from "iitcpluginkit"
 
 import {DialogHelper} from './DialogHelper'
-import {InventoryHelper} from './InventoryHelper'
 
 const PLUGIN_NAME = 'KuKuInventory'
 
@@ -10,8 +9,6 @@ class KuKuInventory implements Plugin.Class {
     private dialogHelper: DialogHelper
     private dialog: JQuery | undefined
 
-    private inventoryHelper: InventoryHelper
-
     init() {
         console.log(`${PLUGIN_NAME} ${VERSION}`)
 
@@ -19,7 +16,6 @@ class KuKuInventory implements Plugin.Class {
         require('./styles.css')
 
         this.dialogHelper = new DialogHelper(PLUGIN_NAME, 'Inventory')
-        this.inventoryHelper = new InventoryHelper()
 
         this.createButtons()
     }
@@ -44,18 +40,12 @@ class KuKuInventory implements Plugin.Class {
         }
     }
 
-    public showPanel(name:string) {
+    public showPanel(name: string) {
         this.dialogHelper.showPanel(name)
     }
 
     public async refresh() {
-        const resos = await this.inventoryHelper.getResonatorsInfo()
-        const weapons = await this.inventoryHelper.getWeaponsInfo()
-        const modulators = await this.inventoryHelper.getModsInfo()
-
-        const boosts = await this.inventoryHelper.getBoostsInfo()
-
-        this.dialogHelper.updateDialog(resos, weapons, modulators, boosts)
+        await this.dialogHelper.updateDialog()
     }
 }
 
