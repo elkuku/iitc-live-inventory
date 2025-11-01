@@ -1,0 +1,12 @@
+{{#eachInMap items}}
+    <tr>
+        <td class="label-container">{{key}}</td>
+        <td class="cnt count-container">{{value.total}}</td>
+        <td class="cnt count-container">{{value.atHand}}</td>
+        <td>
+            {{#eachInMap value.capsules}}
+                {{capsuleNames key}}: <span class="cnt">{{value}}</span><br>
+            {{/eachInMap}}
+        </td>
+    </tr>
+{{/eachInMap}}

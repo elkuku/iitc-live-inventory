@@ -5,12 +5,25 @@ import {HelperOptions} from 'handlebars'
 import dialogTemplate from './templates/dialog.hbs' with {type: 'text'}
 
 // @ts-expect-error "Import attributes are only supported when the --module option is set to esnext, nodenext, or preserve"
+import itemsImageTemplate from './templates/_items-image-container.hbs' with {type: 'text'}
+// @ts-expect-error "Import attributes are only supported when the --module option is set to esnext, nodenext, or preserve"
 import itemsContainerTemplate from './templates/_items-container.hbs' with {type: 'text'}
 // @ts-expect-error "Import attributes are only supported when the --module option is set to esnext, nodenext, or preserve"
-import items1ContainerTemplate from './templates/_items1-container.hbs' with {type: 'text'}
+import itemsKeysTemplate from './templates/_items-keys-container.hbs' with {type: 'text'}
 
 import {translateKey} from '../types/key-translations'
 import {InventoryHelper} from './InventoryHelper'
+import {KeyInfo} from '../types/Types'
+
+// TODO create UI to define capsule names
+const capsuleNames = new Map<string, string>([
+    ['52EF9294', 'Cap Silver'],
+    ['33124ACF', 'Cap Yellow'],
+    ['3C0B9BC3', 'Cap Blue'],
+    ['B517E8AE', 'Cap Green'],
+    ['DB3DE09C', 'Cap Black'],
+    ['FE758180', 'Cap Red'],
+])
 
 Handlebars.registerHelper({
     eachInMap: (map: Map<any, any>, block: HelperOptions) => {
@@ -24,6 +37,9 @@ Handlebars.registerHelper({
     },
     translateKey: (key: string) => {
         return translateKey(key)
+    },
+    capsuleNames: (key: string) => {
+        return capsuleNames.get(key) ?? key
     }
 })
 
@@ -68,35 +84,34 @@ export class DialogHelper {
     public async updateDialog() {
         console.log(await this.inventoryHelper.getInventory())
 
-        const resonators = await this.inventoryHelper.getResonatorsInfo()
-        const weapons = await this.inventoryHelper.getWeaponsInfo()
-        const modulators = await this.inventoryHelper.getModsInfo()
+        const resonators = await this.inventoryHelper.getResonatorsInfo(),
+            weapons = await this.inventoryHelper.getWeaponsInfo(),
+            modulators = await this.inventoryHelper.getModsInfo(),
+            keys = await this.inventoryHelper.getKeysInfo(),
+            cubes = await this.inventoryHelper.getCubesInfo(),
+            boosts = await this.inventoryHelper.getBoostsInfo()
 
-        const cubes = await this.inventoryHelper.getCubesInfo()
-        const boosts = await this.inventoryHelper.getBoostsInfo()
-
-        let total = 0, cntEquipment = 0, cntKeys = 0, cntOther = 0
+        let cntEquipment = 0, cntKeys = 0, cntOther = 0
 
         cntEquipment += this.processResos(resonators)
         cntEquipment += this.processWeapons(weapons)
         cntEquipment += this.processModulators(modulators)
 
-        cntKeys += 0
+        cntKeys += this.processKeys(keys)
 
         cntOther += this.processCubes(cubes)
         cntOther += this.processBoosts(boosts)
 
-        total = cntEquipment + cntKeys + cntOther
 
         this.UpdateCountField('cntEquipment', cntEquipment)
         this.UpdateCountField('cntKeys', cntKeys)
         this.UpdateCountField('cntOther', cntOther)
 
-        this.UpdateCountField('cntTotal', total)
+        this.UpdateCountField('cntTotal', cntEquipment + cntKeys + cntOther)
     }
 
     private processResos(resonators: Map<string, number>) {
-        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsContainerTemplate)
+        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsImageTemplate)
         let cntResos = 0
 
         const resosContainer = document.getElementById(this.pluginName + '-Resonators-Container') as Element
@@ -112,7 +127,7 @@ export class DialogHelper {
     }
 
     private processWeapons(weapons: Map<string, number>) {
-        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsContainerTemplate)
+        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsImageTemplate)
 
         const burstersContainer = document.getElementById(this.pluginName + '-Bursters-Container') as Element
         const strikesContainer = document.getElementById(this.pluginName + '-Strikes-Container') as Element
@@ -152,7 +167,7 @@ export class DialogHelper {
     }
 
     private processModulators(modulators: Map<string, number>) {
-        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsContainerTemplate)
+        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsImageTemplate)
 
         const shieldsContainer = document.getElementById(this.pluginName + '-Shields-Container') as Element,
             hackModsContainer = document.getElementById(this.pluginName + '-HackMods-Container') as Element,
@@ -212,7 +227,7 @@ export class DialogHelper {
     }
 
     private processBoosts(boosts: Map<string, number>) {
-        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(items1ContainerTemplate)//todo TEST
+        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsContainerTemplate)//todo TEST
 
         const boostsPlayContainer = document.getElementById(this.pluginName + '-Boosts-Play-Container') as Element,
             boostsBeaconsContainer = document.getElementById(this.pluginName + '-Boosts-Beacons-Container') as Element,
@@ -247,9 +262,8 @@ export class DialogHelper {
         return total
     }
 
-
     private processCubes(cubes: Map<string, number>) {
-        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(items1ContainerTemplate)//todo TEST
+        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsContainerTemplate)
 
         const cubesContainer = document.getElementById(this.pluginName + '-Cubes-Container') as Element
         cubesContainer.innerHTML = itemsTemplate({items: cubes})
@@ -265,6 +279,34 @@ export class DialogHelper {
         return count
     }
 
+    private processKeys(keys: Map<string, KeyInfo>) {
+        const template: HandlebarsTemplateDelegate = Handlebars.compile(itemsKeysTemplate)
+        const container = document.getElementById(this.pluginName + '-Keys-Container') as Element
+        console.log(keys)
+        container.innerHTML = template(
+            {items: keys},
+            {
+                allowedProtoMethods: {
+                    size: true,
+                },
+            },
+        )
+
+        let total = 0, atHand = 0
+
+        for (const info of keys.values()) {
+            total += info.total
+            atHand += info.atHand ?? 0
+        }
+
+        this.UpdateCountField('cntKeysTotal', total)
+        this.UpdateCountField('cntKeysAtHand', atHand)
+        this.UpdateCountField('cntKeysCapsules', total - atHand)
+
+        this.UpdateCountField('cntKeys', total)
+
+        return total
+    }
 
     private UpdateCountField(name: string, count: number) {
         const element = document.getElementById(this.pluginName + '-' + name) as Element
