@@ -31,6 +31,8 @@ export namespace Inventory {
     export interface Key {
         guid: string
         title: string
+        lat:number
+        lng:number
     }
 
     export interface Cube {
@@ -50,7 +52,15 @@ export namespace Inventory {
 }
 
 export interface KeyInfo {
-    total: number,
-    atHand?: number,
+    total: number
+    atHand?: number
+    portal: Portal
     capsules?: Map<string, number>
+}
+
+interface Portal {
+    guid: string
+    title: string
+    lat: number
+    lng: number
 }

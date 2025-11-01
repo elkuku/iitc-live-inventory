@@ -1,6 +1,12 @@
 {{#eachInMap items}}
     <tr>
-        <td class="label-container">{{key}}</td>
+        <td class="label-container">
+            <a href="javascript:"
+               onclick="window.zoomToAndShowPortal('{{key}}',[{{value.portal.lat}},{{value.portal.lng}}]);"
+            >
+                {{value.portal.title}}
+            </a>
+        </td>
         <td class="cnt count-container">{{value.total}}</td>
         <td class="cnt count-container">{{value.atHand}}</td>
         <td>

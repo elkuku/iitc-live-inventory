@@ -65,13 +65,17 @@ export class InventoryHelper {
                         })
 
                         break
-                    case 'PORTAL_LINK_KEY':
+                    case 'PORTAL_LINK_KEY': {
+                        const parts = object.portalCoupler.portalLocation.split(',')
                         inventory.keys.push({
                             guid: object.portalCoupler.portalGuid,
                             title: object.portalCoupler.portalTitle,
+                            lat: this.convertHexToSignedFloat(parts[0]),
+                            lng: this.convertHexToSignedFloat(parts[1]),
                         })
 
                         break
+                    }
                     case 'KEY_CAPSULE':
                         inventory.keyCapsules.push({
                             differentiator: object.moniker.differentiator,
@@ -148,6 +152,12 @@ export class InventoryHelper {
             keyInfo ??= {
                 total: 0,
                 atHand: 0,
+                portal: {
+                    guid: key.guid,
+                    title: key.title,
+                    lat: key.lat,
+                    lng: key.lng,
+                },
                 capsules: new Map<string, number>(),
             }
 
@@ -182,6 +192,12 @@ export class InventoryHelper {
                 } else {
                     keyInfo = {
                         total: 0,
+                        portal: {
+                            guid: k.key.guid,
+                            title: k.key.title,
+                            lat: k.key.lat,
+                            lng: k.key.lng,
+                        },
                         capsules: new Map<string, number>(),
                     }
 
@@ -335,6 +351,8 @@ export class InventoryHelper {
             const key: Inventory.Key = {
                 guid: guid,
                 title: coupler.portalTitle,
+                lat:0,
+                lng:0,
             }
             const item: Inventory.KeyCapsuleItem = {
                 key: key,
@@ -376,5 +394,16 @@ export class InventoryHelper {
             // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
             (_, textStatus, errorThrown) => reject(textStatus + ': ' + errorThrown)
         ))
+    }
+
+    /**
+     * by EisFrei ?
+     */
+    private convertHexToSignedFloat(num: string) {
+        let int = parseInt(num, 16)
+        if ((int & 0x80000000) === -0x80000000) {
+            int = -1 * (int ^ 0xFFFFFFFF) + 1
+        }
+        return int / 10e5
     }
 }

@@ -21,3 +21,5 @@ translations
     .set('FW_ENL', 'Fireworks Enlightened')
     .set('FW_RES', 'Fireworks Resistance')
     .set('POWER_CUBE-9', 'Hyper Cube')
+
+// TODO: Add more...
