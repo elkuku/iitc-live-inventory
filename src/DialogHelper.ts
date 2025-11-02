@@ -125,7 +125,7 @@ export class DialogHelper {
         this.enableTableSorting('keysTable')
     }
 
-    public sortTable(tableId: string, columnIndex: number, type: 'string' | 'number', ascending: boolean): void {
+    public sortTable(tableId: string, columnIndex: number, type: 'string' | 'number' | 'distance', ascending: boolean): void {
         const table = document.getElementById(tableId) as HTMLTableElement
         const tbody = table.tBodies[0]
         const rows = [...tbody.rows]
@@ -134,17 +134,23 @@ export class DialogHelper {
             const aText = a.cells[columnIndex].textContent?.trim() || ''
             const bText = b.cells[columnIndex].textContent?.trim() || ''
 
-            if (type === 'number') {
-                const aNum = parseFloat(aText)
-                const bNum = parseFloat(bText)
-                return ascending ? aNum - bNum : bNum - aNum
-            } else if (type === 'string') {
-                return ascending
-                    ? aText.localeCompare(bText)
-                    : bText.localeCompare(aText)
+            switch (type) {
+                case 'string': {
+                    return ascending
+                        ? aText.localeCompare(bText)
+                        : bText.localeCompare(aText)
+                }
+                case 'number': {
+                    const aNum = parseFloat(aText)
+                    const bNum = parseFloat(bText)
+                    return ascending ? aNum - bNum : bNum - aNum
+                }
+                case 'distance': {
+                    const aNum = this.parseDistance(aText)
+                    const bNum = this.parseDistance(bText)
+                    return ascending ? aNum - bNum : bNum - aNum
+                }
             }
-
-            return 0
         })
 
         rows.forEach(row => tbody.appendChild(row))
@@ -161,7 +167,7 @@ export class DialogHelper {
             indicator.style.marginLeft = '8px'
             header.appendChild(indicator)
 
-            const type = header.dataset.type as 'string' | 'number'
+            const type = header.dataset.type as 'string' | 'number' | 'distance'
             if (type) {
                 header.addEventListener('click', () => {
                     this.sortTable(tableId, i, type, ascending)
@@ -176,6 +182,24 @@ export class DialogHelper {
                 })
             }
         })
+    }
+
+    private parseDistance(distanceStr: string): number {
+        const match = /^([\d.]+)\s*(\w+)$/.exec(distanceStr.trim())
+
+        if (!match) return 0
+
+        const value = parseFloat(match[1])
+        const unit = match[2].toLowerCase()
+
+        switch (unit) {
+            case 'm':
+                return value
+            case 'km':
+                return value * 1000
+            default:
+                return value
+        }
     }
 
     private processResos(resonators: Map<string, number>) {
