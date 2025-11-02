@@ -347,12 +347,14 @@ export class InventoryHelper {
         const keys = []
         for (const capsuleItem of items) {
             const coupler = capsuleItem.exampleGameEntity[2].portalCoupler
+            const parts = coupler.portalLocation.split(',')
+
             const guid = coupler.portalGuid
             const key: Inventory.Key = {
                 guid: guid,
                 title: coupler.portalTitle,
-                lat:0,
-                lng:0,
+                lat: this.convertHexToSignedFloat(parts[0]),
+                lng: this.convertHexToSignedFloat(parts[1]),
             }
             const item: Inventory.KeyCapsuleItem = {
                 key: key,

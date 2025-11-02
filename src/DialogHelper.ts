@@ -35,11 +35,24 @@ Handlebars.registerHelper({
         }
         return out
     },
-    translateKey: (key: string) => {
+    translateKey: (key: string): string => {
         return translateKey(key)
     },
-    capsuleNames: (key: string) => {
+    capsuleNames: (key: string): string => {
         return capsuleNames.get(key) ?? key
+    },
+    distance: (lat: number, lng: number): string => {
+        const center = window.map.getCenter()
+        const latLng = L.latLng(lat, lng)
+        const distance = latLng.distanceTo(center)
+
+        if (distance >= 10000) {
+            return `${Math.round(distance / 1000)} km`
+        } else if (distance >= 1000) {
+            return `${Math.round(distance / 100) / 10} km`
+        }
+
+        return `${Math.round(distance)} m`
     }
 })
 
@@ -108,6 +121,61 @@ export class DialogHelper {
         this.UpdateCountField('cntOther', cntOther)
 
         this.UpdateCountField('cntTotal', cntEquipment + cntKeys + cntOther)
+
+        this.enableTableSorting('keysTable')
+    }
+
+    public sortTable(tableId: string, columnIndex: number, type: 'string' | 'number', ascending: boolean): void {
+        const table = document.getElementById(tableId) as HTMLTableElement
+        const tbody = table.tBodies[0]
+        const rows = [...tbody.rows]
+
+        rows.sort((a, b) => {
+            const aText = a.cells[columnIndex].textContent?.trim() || ''
+            const bText = b.cells[columnIndex].textContent?.trim() || ''
+
+            if (type === 'number') {
+                const aNum = parseFloat(aText)
+                const bNum = parseFloat(bText)
+                return ascending ? aNum - bNum : bNum - aNum
+            } else if (type === 'string') {
+                return ascending
+                    ? aText.localeCompare(bText)
+                    : bText.localeCompare(aText)
+            }
+
+            return 0
+        })
+
+        rows.forEach(row => tbody.appendChild(row))
+    }
+
+    public enableTableSorting(tableId: string): void {
+        const table = document.getElementById(tableId) as HTMLTableElement
+        const headers = table.querySelectorAll('th')
+
+        headers.forEach((header, i) => {
+            let ascending = true
+
+            const indicator = document.createElement('span')
+            indicator.style.marginLeft = '8px'
+            header.appendChild(indicator)
+
+            const type = header.dataset.type as 'string' | 'number'
+            if (type) {
+                header.addEventListener('click', () => {
+                    this.sortTable(tableId, i, type, ascending)
+                    ascending = !ascending
+
+                    headers.forEach((hdr) => {
+                        const span = hdr.querySelector('span:not(.cnt)')
+                        if (span) span.textContent = ''
+                    })
+
+                    indicator.textContent = (ascending) ? '▲' : '▼' // Down arrow for descending
+                })
+            }
+        })
     }
 
     private processResos(resonators: Map<string, number>) {
@@ -282,15 +350,8 @@ export class DialogHelper {
     private processKeys(keys: Map<string, KeyInfo>) {
         const template: HandlebarsTemplateDelegate = Handlebars.compile(itemsKeysTemplate)
         const container = document.getElementById(this.pluginName + '-Keys-Container') as Element
-        console.log(keys)
-        container.innerHTML = template(
-            {items: keys},
-            {
-                allowedProtoMethods: {
-                    size: true,
-                },
-            },
-        )
+
+        container.innerHTML = template({items: keys})
 
         let total = 0, atHand = 0
 

@@ -51,11 +51,12 @@
         </table>
     </div>
     <div id="{{prefix}}-Keys-Panel" style="display: none;">
-        <table class="inventoryTable">
+        <table class="inventoryTable" id="keysTable">
         <thead>
         <tr>
-            <th>Name</th>
-            <th>Total <span class="cnt" id="{{prefix}}-cntKeysTotal"></span></th>
+            <th data-type="string"><a href="#">Name</a></th>
+            <th data-type="number"><a href="#">Distance</a></th>
+            <th data-type="number"><a href="#">Total</a> <span class="cnt" id="{{prefix}}-cntKeysTotal"></span></th>
             <th>atHand <span class="cnt" id="{{prefix}}-cntKeysAtHand"></span></th>
             <th>Capsules <span class="cnt" id="{{prefix}}-cntKeysCapsules"></span></th>
         </tr>
