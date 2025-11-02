@@ -95,8 +95,6 @@ export class DialogHelper {
     }
 
     public async updateDialog() {
-        console.log(await this.inventoryHelper.getInventory())
-
         const resonators = await this.inventoryHelper.getResonatorsInfo(),
             weapons = await this.inventoryHelper.getWeaponsInfo(),
             modulators = await this.inventoryHelper.getModsInfo(),
@@ -114,7 +112,6 @@ export class DialogHelper {
 
         cntOther += this.processCubes(cubes)
         cntOther += this.processBoosts(boosts)
-
 
         this.UpdateCountField('cntEquipment', cntEquipment)
         this.UpdateCountField('cntKeys', cntKeys)

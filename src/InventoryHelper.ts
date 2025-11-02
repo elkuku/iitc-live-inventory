@@ -1,5 +1,5 @@
 import {Inventory, KeyInfo} from '../types/Types'
-import {IngressInventory} from '../types/IngressInventory'
+import {InventoryFetcher} from './InventoryFetcher'
 
 export class InventoryHelper {
     private inventory: Inventory.Items
@@ -9,135 +9,11 @@ export class InventoryHelper {
             return this.inventory
         }
 
-        const inventory: Inventory.Items = {
-            resonators: [],
-            weapons: [],
-            mods: [],
-            keys: [],
-            cubes: [],
-            boosts: [],
-            keyCapsules: [],
-        }
+        const fetcher = new InventoryFetcher()
 
-        try {
-            const items: IngressInventory.Items[] = await this.fetchInventory()
+        this.inventory = await fetcher.get()
 
-            for (const whyIsThisAnArray of items) {
-                // This is a #/&§$%%$ array...
-                const object = whyIsThisAnArray[2]
-
-                let type = '', designation = '', level = 0
-
-                if (Object.prototype.hasOwnProperty.call(object, 'resource')) {
-                    type = object.resource.resourceType
-                } else if (Object.prototype.hasOwnProperty.call(object, 'resourceWithLevels')) {
-                    type = object.resourceWithLevels.resourceType
-                    level = object.resourceWithLevels.level
-                } else if (Object.prototype.hasOwnProperty.call(object, 'modResource')) {
-                    type = 'modResource'
-                } else {
-                    console.warn('Unknown resource type in object', object)
-                }
-
-                if (Object.prototype.hasOwnProperty.call(object, 'timedPowerupResource')) {
-                    designation = object.timedPowerupResource.designation
-                }
-
-                switch (type) {
-                    case 'EMITTER_A': // This is a so-called "resonator"
-                        inventory.resonators.push({
-                            level: level
-                        })
-
-                        break
-                    case 'ULTRA_STRIKE':
-                    case 'EMP_BURSTER':
-                        inventory.weapons.push({
-                            type: type,
-                            level: level
-                        })
-
-                        break
-                    case 'FLIP_CARD':
-                        inventory.weapons.push({
-                            type: object.flipCard.flipCardType,
-                            level: 0
-                        })
-
-                        break
-                    case 'PORTAL_LINK_KEY': {
-                        const parts = object.portalCoupler.portalLocation.split(',')
-                        inventory.keys.push({
-                            guid: object.portalCoupler.portalGuid,
-                            title: object.portalCoupler.portalTitle,
-                            lat: this.convertHexToSignedFloat(parts[0]),
-                            lng: this.convertHexToSignedFloat(parts[1]),
-                        })
-
-                        break
-                    }
-                    case 'KEY_CAPSULE':
-                        inventory.keyCapsules.push({
-                            differentiator: object.moniker.differentiator,
-                            count: object.container.currentCount,
-                            keys: this.listKeysInCapsule(object.container.stackableItems),
-                        })
-
-                        break
-                    case 'PLAYER_POWERUP': // apex
-                        if (object.playerPowerupResource.playerPowerupEnum === 'APEX') {
-                            inventory.boosts.push({
-                                type: 'APEX'
-                            })
-                        } else {
-                            console.warn('Unknown PLAYER_POWERUP', object)
-                        }
-                        break
-                    case 'PORTAL_POWERUP':
-                        inventory.boosts.push({
-                            type: designation
-                        })
-
-                        break
-                    case 'modResource':
-                        inventory.mods.push({
-                            type: object.modResource.resourceType,
-                            rarity: object.modResource.rarity,
-                        })
-
-                        break
-                    case 'POWER_CUBE':
-                        inventory.cubes.push({
-                            level: level
-                        })
-                        break
-                    case 'BOOSTED_POWER_CUBE': // hyper cube
-                        inventory.cubes.push({
-                            level: 9
-                        })
-                        break
-                    case 'CAPSULE': // TODO process capsules
-                    case 'KINETIC_CAPSULE':
-                    case 'ENTITLEMENT': // ???
-                    case 'DRONE':
-                        // todo process those items (?)
-                        // console.log(`todo type: ${type}`, object)
-                        break
-                    default:
-                        console.warn(`Unknown type: ${type}`, object)
-                        break
-                }
-            }
-        } catch (error) {
-            const element = document.getElementById('iitc-inventory-content')
-            const message: string = error.message ?? error
-            if (element) element.innerHTML = `<div style="color:red">Error: ${message}</div>`
-            console.error(message)
-        }
-
-        this.inventory = inventory
-
-        return inventory
+        return this.inventory
     }
 
     public async getKeysInfo(): Promise<Map<string, KeyInfo>> {
@@ -341,71 +217,5 @@ export class InventoryHelper {
         }
 
         return info
-    }
-
-    private listKeysInCapsule(items: IngressInventory.ContainerItem[]): Inventory.KeyCapsuleItem[] {
-        const keys = []
-        for (const capsuleItem of items) {
-            const coupler = capsuleItem.exampleGameEntity[2].portalCoupler
-            const parts = coupler.portalLocation.split(',')
-
-            const guid = coupler.portalGuid
-            const key: Inventory.Key = {
-                guid: guid,
-                title: coupler.portalTitle,
-                lat: this.convertHexToSignedFloat(parts[0]),
-                lng: this.convertHexToSignedFloat(parts[1]),
-            }
-            const item: Inventory.KeyCapsuleItem = {
-                key: key,
-                count: capsuleItem.itemGuids.length,
-            }
-
-            keys.push(item)
-        }
-        return keys
-    }
-
-    private async fetchInventory(): Promise<IngressInventory.Items[]> {
-        const isEnabled = false // todo load data from cache
-
-        let items: IngressInventory.Items[]
-
-        if (isEnabled) {
-            const response = await this.postAjax('getInventory', {lastQueryTimestamp: 0})
-
-            items = response.result
-
-        } else {
-            // todo REMOVE TEST DATA
-            // eslint-disable-next-line @typescript-eslint/no-require-imports
-            const json = require('../testfiles/example1.json')
-
-            items = json.result
-        }
-
-        return items
-    }
-
-    private postAjax(action: string, data: any): PromiseLike<any> {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return new Promise((resolve, reject) => window.postAjax(
-            action,
-            data,
-            (returnValue) => resolve(returnValue),
-            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-            (_, textStatus, errorThrown) => reject(textStatus + ': ' + errorThrown)
-        ))
-    }
-
-    /**
-     * by EisFrei ?
-     */
-    private convertHexToSignedFloat(num: string) {
-        let int = parseInt(num, 16)
-        if ((int & 0x80000000) === -0x80000000) {
-            int = -1 * (int ^ 0xFFFFFFFF) + 1
-        }
-        return int / 10e5
     }
 }
