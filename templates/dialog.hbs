@@ -1,8 +1,9 @@
 <div id="{{prefix}}Container">
 
-    Total: <span class="cnt" id="{{prefix}}-cntTotal"></span>
+    <button onclick="{{plugin}}.refresh()" class="btnRefresh">Refresh</button>
 
     <div>
+        Total: <span class="cnt" id="{{prefix}}-cntTotal"></span>
         <button onclick="{{plugin}}.showPanel('Inventory')">
             Equipment <span class="cnt" id="{{prefix}}-cntEquipment"></span>
         </button>
@@ -86,8 +87,6 @@
             </tbody>
         </table>
     </div>
-
-    <button onclick="{{plugin}}.refresh()">Refresh</button>
 
 </div>
 

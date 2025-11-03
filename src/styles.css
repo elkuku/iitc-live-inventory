@@ -26,6 +26,10 @@ span.cnt, td.cnt {
     color: lime;
 }
 
+button.btnRefresh{
+    float: right;
+}
+
 .icon {
     min-width: 64px;
     height: 64px;

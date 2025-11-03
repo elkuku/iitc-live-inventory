@@ -81,6 +81,7 @@ export class DialogHelper {
             html: template(data),
             width: 800,
             height: 600,
+            buttons: [],
         }).parent()
     }
 
@@ -175,7 +176,7 @@ export class DialogHelper {
                         if (span) span.textContent = ''
                     })
 
-                    indicator.textContent = (ascending) ? '▲' : '▼' // Down arrow for descending
+                    indicator.textContent = (ascending) ? '▲' : '▼'
                 })
             }
         })
@@ -316,7 +317,7 @@ export class DialogHelper {
     }
 
     private processBoosts(boosts: Map<string, number>) {
-        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsContainerTemplate)//todo TEST
+        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsContainerTemplate)
 
         const boostsPlayContainer = document.getElementById(this.pluginName + '-Boosts-Play-Container') as Element,
             boostsBeaconsContainer = document.getElementById(this.pluginName + '-Boosts-Beacons-Container') as Element,
