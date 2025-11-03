@@ -22,7 +22,7 @@ jobs:
         run: yarn install --immutable --frozen-lockfile
 
       - name: Run build
-        run: yarn build # This generates your artifact in the 'dist' folder
+        run: yarn build:prod # This generates your artifact in the 'dist' folder
 
       # Create a GitHub Release and upload the artifact
       - name: Create Release and Upload Assets
