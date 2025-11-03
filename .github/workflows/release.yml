@@ -31,8 +31,7 @@ jobs:
       - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-            dist/* # Upload all files in the 'dist' directory
+          files: dist/*
           draft: false # Set to true to create a draft release first
           prerelease: false # Set to true if it's a prerelease
         env:
