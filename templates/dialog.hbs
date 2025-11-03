@@ -1,6 +1,9 @@
 <div id="{{prefix}}Container">
 
-    <button onclick="{{plugin}}.refresh()" class="btnRefresh">Refresh</button>
+    <div class="sideButtons">
+        <button onclick="{{plugin}}.showPanel('Info')">Info</button>
+        <button onclick="{{plugin}}.refresh()">Refresh</button>
+    </div>
 
     <div>
         Total: <span class="cnt" id="{{prefix}}-cntTotal"></span>
@@ -39,7 +42,7 @@
             <tbody>
             <tr>
                 <!-- Resos -->
-                <td id="{{prefix}}-Resonators-Container" class="item-container"></td>
+                <td id="{{prefix}}-Resonators-Container" class="item-container">Fetching inventory...</td>
                 <!-- Weapons -->
                 <td id="{{prefix}}-Bursters-Container" class="item-container"></td>
                 <td id="{{prefix}}-Strikes-Container" class="item-container"></td>
@@ -53,15 +56,15 @@
     </div>
     <div id="{{prefix}}-Keys-Panel" style="display: none;">
         <table class="inventoryTable" id="keysTable">
-        <thead>
-        <tr>
-            <th data-type="string"><a href="#">Name</a></th>
-            <th data-type="distance"><a href="#">Distance</a></th>
-            <th data-type="number"><a href="#">Total</a> <span class="cnt" id="{{prefix}}-cntKeysTotal"></span></th>
-            <th>atHand <span class="cnt" id="{{prefix}}-cntKeysAtHand"></span></th>
-            <th>Capsules <span class="cnt" id="{{prefix}}-cntKeysCapsules"></span></th>
-        </tr>
-        </thead>
+            <thead>
+            <tr>
+                <th data-type="string"><a href="#">Name</a></th>
+                <th data-type="distance"><a href="#">Distance</a></th>
+                <th data-type="number"><a href="#">Total</a> <span class="cnt" id="{{prefix}}-cntKeysTotal"></span></th>
+                <th>atHand <span class="cnt" id="{{prefix}}-cntKeysAtHand"></span></th>
+                <th>Capsules <span class="cnt" id="{{prefix}}-cntKeysCapsules"></span></th>
+            </tr>
+            </thead>
             <tbody id="{{prefix}}-Keys-Container"></tbody>
         </table>
     </div>
@@ -86,6 +89,9 @@
             </tr>
             </tbody>
         </table>
+    </div>
+    <div id="{{prefix}}-Info-Panel" style="display: none;">
+        Info
     </div>
 
 </div>

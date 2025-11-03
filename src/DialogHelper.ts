@@ -14,6 +14,7 @@ import itemsKeysTemplate from '../templates/_items-keys-container.hbs' with {typ
 import {translateKey} from '../types/key-translations'
 import {InventoryHelper} from './InventoryHelper'
 import {KeyInfo} from '../types/Types'
+import {Utility} from './Utility'
 
 // TODO create UI to define capsule names
 const capsuleNames = new Map<string, string>([
@@ -42,17 +43,7 @@ Handlebars.registerHelper({
         return capsuleNames.get(key) ?? key
     },
     distance: (lat: number, lng: number): string => {
-        const center = window.map.getCenter()
-        const latLng = L.latLng(lat, lng)
-        const distance = latLng.distanceTo(center)
-
-        if (distance >= 10000) {
-            return `${Math.round(distance / 1000)} km`
-        } else if (distance >= 1000) {
-            return `${Math.round(distance / 100) / 10} km`
-        }
-
-        return `${Math.round(distance)} m`
+        return Utility.distance(L.latLng(lat, lng))
     }
 })
 
@@ -86,13 +77,24 @@ export class DialogHelper {
     }
 
     public showPanel(name: string) {
-        for (const panel of ['Inventory', 'Keys', 'Other']) {
+        for (const panel of ['Inventory', 'Keys', 'Other', 'Info']) {
             const element = document.getElementById(`${this.pluginName}-${panel}-Panel`)
             if (element) element.style.display = 'none'
         }
 
         const element = document.getElementById(`${this.pluginName}-${name}-Panel`)
         if (element) element.style.display = 'block'
+    }
+
+    public async refresh() {
+        try {
+            await this.inventoryHelper.refresh()
+            await this.updateDialog()
+        } catch (error) {
+            // We probably hit the rate limit...
+            console.error(error)
+            alert(error.message)
+        }
     }
 
     public async updateDialog() {
@@ -296,13 +298,13 @@ export class DialogHelper {
         }
 
         shieldsContainer.innerHTML = itemsTemplate({
-            items: this.sortMapByCompoundKey(shields, ['RES_SHIELD', 'EXTRA_SHIELD'], rarities)
+            items: Utility.sortMapByCompoundKey(shields, ['RES_SHIELD', 'EXTRA_SHIELD'], rarities)
         })
         hackModsContainer.innerHTML = itemsTemplate({
-            items: this.sortMapByCompoundKey(hackMods, ['HEATSINK', 'MULTIHACK'], rarities)
+            items: Utility.sortMapByCompoundKey(hackMods, ['HEATSINK', 'MULTIHACK'], rarities)
         })
         otherModsContainer.innerHTML = itemsTemplate({
-            items: this.sortMapByKey(otherMods, otherModsTypes)
+            items: Utility.sortMapByKey(otherMods, otherModsTypes)
         })
 
         const total = cntShields + cntHack + cntOther
@@ -341,7 +343,7 @@ export class DialogHelper {
         }
 
         total += cntPlay + cntBeacons
-        boostsPlayContainer.innerHTML = itemsTemplate({items: this.sortMapByKey(play, playTypes)})
+        boostsPlayContainer.innerHTML = itemsTemplate({items: Utility.sortMapByKey(play, playTypes)})
         boostsBeaconsContainer.innerHTML = itemsTemplate({items: beacons})
 
         this.UpdateCountField('cntBoostsPlay', cntPlay)
@@ -401,37 +403,4 @@ export class DialogHelper {
         }
     }
 
-    private sortMapByKey<T>(
-        map: Map<string, T>,
-        order: string[]
-    ): Map<string, any> {
-        return new Map(
-            [...map.entries()].toSorted(
-                ([a], [b]) => order.indexOf(a) - order.indexOf(b)
-            )
-        )
-    }
-
-    private sortMapByCompoundKey<T>(
-        map: Map<string, T>,
-        orderPart1: string[],
-        orderPart2: string[]
-    ): Map<string, any> {
-        return new Map(
-            [...map.entries()].toSorted(
-                ([keyA], [keyB]) => {
-                    const [partA1, partA2] = keyA.split('-')
-                    const [partB1, partB2] = keyB.split('-')
-
-                    const order1Diff = orderPart1.indexOf(partA1) - orderPart1.indexOf(partB1)
-                    if (order1Diff !== 0) {
-
-                        return order1Diff
-                    }
-
-                    return orderPart2.indexOf(partA2) - orderPart2.indexOf(partB2)
-                }
-            )
-        )
-    }
 }

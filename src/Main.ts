@@ -36,7 +36,7 @@ class KuKuInventory implements Plugin.Class {
                 this.dialog = undefined
             })
 
-            await this.refresh()
+            await this.dialogHelper.updateDialog()
         }
     }
 
@@ -45,7 +45,7 @@ class KuKuInventory implements Plugin.Class {
     }
 
     public async refresh() {
-        await this.dialogHelper.updateDialog()
+        await this.dialogHelper.refresh()
     }
 }
 

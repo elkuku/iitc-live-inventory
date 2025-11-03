@@ -6,10 +6,11 @@
 import {InventoryParser} from './InventoryParser'
 import {Inventory} from '../types/Types'
 import {IngressAPI} from '../types/IngressAPI'
+import {Utility} from './Utility'
 
 const KEY_SETTINGS = 'plugin-kuku-inventory'
 
-declare global{
+declare global {
     interface Window {
         postAjax: <T>(
             action: string,
@@ -25,34 +26,46 @@ export class InventoryFetcher {
     private expires = 0
 
     public async getInventory(): Promise<Inventory.Items> {
-        console.log(`Fetching inventory...`)
-
-        if (this.inventory) {
-            return this.inventory
-        }
+        console.log('Fetching inventory...')
 
         if (this.loadInventoryFromLocalStorage()) {
+            console.log('... from local storage...')
             if (Date.now() > this.expires) {
-                await this.refresh()
+                console.log(`... has expired ${Utility.formatTimeString(this.expires - Date.now())} :( ... refreshing...`)
+
+                try {
+                    return await this.refresh()
+                } catch (error) {
+                    console.error(error)
+                    return this.inventory
+                }
             }
 
+            console.log(`OK - still has ${Utility.formatTimeString(this.expires - Date.now())}`)
+
             return this.inventory
+        } else {
+            console.log('... no local storage :(')
         }
 
-        await this.refresh()
-
-        return this.inventory
+        return await this.refresh()
     }
 
     public async refresh() {
         console.log('Refreshing inventory...')
-        const response = await this.postAjax<IngressAPI.Response>('getInventory', {lastQueryTimestamp: 0})
+        const response = await this.postAjax<IngressAPI.InventoryResponse>('getInventory', {lastQueryTimestamp: 0})
+
+        if (response.result.length === 0) {
+            throw new Error('Failed to refresh inventory')
+        }
 
         console.log('Inventory data received')
         const parser = new InventoryParser()
         const items = parser.parse(response.result)
         this.saveInventoryToLocalStorage(items)
         this.inventory = items
+
+        return this.inventory
     }
 
     private loadInventoryFromLocalStorage(): boolean {

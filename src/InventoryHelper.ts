@@ -3,15 +3,24 @@ import {InventoryFetcher} from './InventoryFetcher'
 
 export class InventoryHelper {
     private inventory: Inventory.Items
+    private fetcher: InventoryFetcher
+
+    constructor() {
+        this.fetcher = new InventoryFetcher()
+    }
 
     public async getInventory() {
         if (this.inventory) {
             return this.inventory
         }
 
-        const fetcher = new InventoryFetcher()
+        this.inventory = await this.fetcher.getInventory()
 
-        this.inventory = await fetcher.getInventory()
+        return this.inventory
+    }
+
+    public async refresh() {
+        this.inventory = await this.fetcher.refresh()
 
         return this.inventory
     }

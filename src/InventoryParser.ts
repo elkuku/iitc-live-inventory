@@ -1,9 +1,10 @@
 import {IngressInventory} from '../types/IngressInventory'
 import {Inventory} from '../types/Types'
 import ContainerItem = IngressInventory.ContainerItem;
+import {Utility} from './Utility'
 
 export class InventoryParser {
-    public parse(items: any): Inventory.Items {
+    public parse(items: IngressInventory.Items): Inventory.Items {
         const inventory: Inventory.Items = {
             resonators: [],
             weapons: [],
@@ -58,8 +59,8 @@ export class InventoryParser {
                     inventory.keys.push({
                         guid: object.portalCoupler.portalGuid,
                         title: object.portalCoupler.portalTitle,
-                        lat: this.convertHexToSignedFloat(parts[0]),
-                        lng: this.convertHexToSignedFloat(parts[1]),
+                        lat: Utility.convertHexToSignedFloat(parts[0]),
+                        lng: Utility.convertHexToSignedFloat(parts[1]),
                     })
                     break
                 }
@@ -120,8 +121,8 @@ export class InventoryParser {
             const key: Inventory.Key = {
                 guid: guid,
                 title: coupler.portalTitle,
-                lat: this.convertHexToSignedFloat(parts[0]),
-                lng: this.convertHexToSignedFloat(parts[1]),
+                lat: Utility.convertHexToSignedFloat(parts[0]),
+                lng: Utility.convertHexToSignedFloat(parts[1]),
             }
             const item: Inventory.KeyCapsuleItem = {
                 key: key,
@@ -131,16 +132,5 @@ export class InventoryParser {
             keys.push(item)
         }
         return keys
-    }
-
-    /**
-     * by EisFrei ?
-     */
-    private convertHexToSignedFloat(num: string) {
-        let int = parseInt(num, 16)
-        if ((int & 0x80000000) === -0x80000000) {
-            int = -1 * (int ^ 0xFFFFFFFF) + 1
-        }
-        return int / 10e5
     }
 }
