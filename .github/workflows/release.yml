@@ -25,14 +25,13 @@ jobs:
         run: yarn install --immutable --frozen-lockfile
 
       - name: Run build
-        run: yarn build:prod # This generates your artifact in the 'dist' folder
+        run: yarn build:prod
 
-      # Create a GitHub Release and upload the artifact
       - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v1
         with:
           files: dist/*
-          draft: false # Set to true to create a draft release first
-          prerelease: false # Set to true if it's a prerelease
+          draft: false
+          prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # The default GITHUB_TOKEN has the necessary permissions
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
