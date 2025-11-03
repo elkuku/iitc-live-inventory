@@ -5,14 +5,26 @@
 
 import {InventoryParser} from './InventoryParser'
 import {Inventory} from '../types/Types'
+import {IngressAPI} from '../types/IngressAPI'
 
 const KEY_SETTINGS = 'plugin-kuku-inventory'
+
+declare global{
+    interface Window {
+        postAjax: <T>(
+            action: string,
+            data: unknown,
+            onSuccess: (returnValue: T) => void,
+            onError: (xhr: unknown, status: string, error: string) => void
+        ) => void
+    }
+}
 
 export class InventoryFetcher {
     private inventory: Inventory.Items
     private expires = 0
 
-    public async get(): Promise<Inventory.Items> {
+    public async getInventory(): Promise<Inventory.Items> {
         console.log(`Fetching inventory...`)
 
         if (this.inventory) {
@@ -34,7 +46,7 @@ export class InventoryFetcher {
 
     public async refresh() {
         console.log('Refreshing inventory...')
-        const response = await this.postAjax('getInventory', {lastQueryTimestamp: 0})
+        const response = await this.postAjax<IngressAPI.Response>('getInventory', {lastQueryTimestamp: 0})
 
         console.log('Inventory data received')
         const parser = new InventoryParser()
@@ -79,15 +91,15 @@ export class InventoryFetcher {
         })
     }
 
-    private postAjax(action: string, data: any): PromiseLike<any> {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return new Promise((resolve, reject) => window.postAjax(
-            action,
-            data,
-            (returnValue) => resolve(returnValue),
-            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-            (_, textStatus, errorThrown) => reject(textStatus + ': ' + errorThrown)
-        ))
+    private postAjax<T>(action: string, data: unknown): Promise<T> {
+        return new Promise((resolve, reject) =>
+            window.postAjax<T>(
+                action,
+                data,
+                (returnValue) => resolve(returnValue),
+                (_: unknown, status: string, error: string) =>
+                    reject(new Error(`${status}: ${error}`))
+            )
+        )
     }
-
 }

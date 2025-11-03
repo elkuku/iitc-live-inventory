@@ -11,7 +11,7 @@ export class InventoryHelper {
 
         const fetcher = new InventoryFetcher()
 
-        this.inventory = await fetcher.get()
+        this.inventory = await fetcher.getInventory()
 
         return this.inventory
     }
