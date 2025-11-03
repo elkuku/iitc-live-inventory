@@ -1,6 +1,6 @@
 # KuKu Inventory Plugin
 
-A plugin for IITC to display the inventory (CORE required).
+A plugin for IITC to display the agents inventory (CORE required).
 
 ----
 
