@@ -1,0 +1,36 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger this workflow when a tag starting with 'v' is pushed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --immutable --frozen-lockfile
+
+      - name: Run build
+        run: yarn build # This generates your artifact in the 'dist' folder
+
+      # Create a GitHub Release and upload the artifact
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/* # Upload all files in the 'dist' directory
+          draft: false # Set to true to create a draft release first
+          prerelease: false # Set to true if it's a prerelease
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # The default GITHUB_TOKEN has the necessary permissions

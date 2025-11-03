@@ -28,8 +28,11 @@ jobs:
         run: yarn install --immutable --frozen-lockfile # Use these flags for CI if you use Yarn 2+ and have a lockfile
         # For Yarn 1.x, a simple 'yarn install' is often sufficient
 
-      - name: Run build
-        run: yarn build # This runs the 'build' script defined in your package.json
+      - name: Run build dev
+        run: yarn build
+
+      - name: Run build prod
+        run: yarn build:prod
 
       # Optional: Upload the build artifact
       - name: Upload build artifacts
