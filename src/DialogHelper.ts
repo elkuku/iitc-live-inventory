@@ -2,14 +2,14 @@ import * as Handlebars from 'handlebars'
 import {HelperOptions} from 'handlebars'
 
 // @ts-expect-error "Import attributes are only supported when the --module option is set to esnext, nodenext, or preserve"
-import dialogTemplate from './templates/dialog.hbs' with {type: 'text'}
+import dialogTemplate from '../templates/dialog.hbs' with {type: 'text'}
 
 // @ts-expect-error "Import attributes are only supported when the --module option is set to esnext, nodenext, or preserve"
-import itemsImageTemplate from './templates/_items-image-container.hbs' with {type: 'text'}
+import itemsImageTemplate from '../templates/_items-image-container.hbs' with {type: 'text'}
 // @ts-expect-error "Import attributes are only supported when the --module option is set to esnext, nodenext, or preserve"
-import itemsContainerTemplate from './templates/_items-container.hbs' with {type: 'text'}
+import itemsContainerTemplate from '../templates/_items-container.hbs' with {type: 'text'}
 // @ts-expect-error "Import attributes are only supported when the --module option is set to esnext, nodenext, or preserve"
-import itemsKeysTemplate from './templates/_items-keys-container.hbs' with {type: 'text'}
+import itemsKeysTemplate from '../templates/_items-keys-container.hbs' with {type: 'text'}
 
 import {translateKey} from '../types/key-translations'
 import {InventoryHelper} from './InventoryHelper'
