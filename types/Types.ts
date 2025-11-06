@@ -31,8 +31,8 @@ export namespace Inventory {
     export interface Key {
         guid: string
         title: string
-        lat:number
-        lng:number
+        lat: number
+        lng: number
     }
 
     export interface Cube {
@@ -63,4 +63,34 @@ interface Portal {
     title: string
     lat: number
     lng: number
+}
+
+interface PluginSync {
+    // Other plugin call this to register a field as CollaborativeMap to sync with Google Drive API
+    // example: plugin.sync.registerMapForSync('keys', 'keysdata', plugin.keys.updateCallback, plugin.keys.initializedCallback)
+    // which register plugin.keys.keysdata
+    //
+    // updateCallback function format: function(pluginName, fieldName, null, fullUpdated)
+    // updateCallback will be fired when local or remote pushed update to Google Drive API
+    // fullUpdated is true when remote update occur during local client offline, all data is replaced by remote data
+    // the third parameter is always null for compatibility
+    //
+    // initializedCallback function format: function(pluginName, fieldName)
+    // initializedCallback will be fired when the storage finished initialize and good to use
+    registerMapForSync: (pluginName: string, fieldName: string, callback: CallableFunction, initializedCallback: CallableFunction) => void
+
+    // Other plugin call this function to push update to Google Drive API
+    // example:
+    // plugin.sync.updateMap('keys', 'keysdata', ['guid1', 'guid2', 'guid3'])
+    // Which will push plugin.keys.keysdata['guid1'] etc. to Google Drive API
+    updateMap: (pluginName: string, fieldName: string, keyArray: unknown) => void
+}
+
+declare global {
+    interface Window {
+        plugin: {
+            KuKuInventory: any;
+            sync?: PluginSync;
+        }
+    }
 }

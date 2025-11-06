@@ -1,0 +1,8 @@
+{{#each keyCapsules}}
+    <tr>
+        <td>{{this.differentiator}}</td>
+        <td>
+            <input type="text" name="{{this.differentiator}}" value="{{lookup ../this.names this.differentiator}}" />
+        </td>
+    </tr>
+{{/each}}

@@ -16,6 +16,9 @@
         <button onclick="{{plugin}}.showPanel('Other')">
             Other <span class="cnt" id="{{prefix}}-cntOther"></span>
         </button>
+        <button onclick="{{plugin}}.showPanel('Capsules')">
+            Capsules <span class="cnt" id="{{prefix}}-cntCapsules"></span>
+        </button>
     </div>
 
     <div id="{{prefix}}-Inventory-Panel" style="display: block;">
@@ -91,11 +94,28 @@
         </table>
     </div>
     <div id="{{prefix}}-Info-Panel" style="display: none;">
-        <h2>Info</h2>
+        <h2>{{product.name}} {{product.version}}</h2>
         <ul>
-            <li>GitHub repository: <a href="https://github.com/elkuku/iitc-kuku-inventory" target="_blank">elkuku/iitc-kuku-inventory</a></li>
+            <li>
+                GitHub:
+                <a href="https://github.com/elkuku/iitc-kuku-inventory" target="_blank">
+                    elkuku/iitc-kuku-inventory
+                </a>
+            </li>
         </ul>
     </div>
-
+    <div id="{{prefix}}-Capsules-Panel" style="display: none;">
+        Key Capsules
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+            </tr>
+            </thead>
+            <tbody id="{{prefix}}-KeyCapsules-Container"></tbody>
+        </table>
+        <button onclick="{{plugin}}.storeCapsuleNames()">Save</button>
+    </div>
 </div>
 

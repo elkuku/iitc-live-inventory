@@ -10,21 +10,16 @@ import itemsImageTemplate from '../templates/_items-image-container.hbs' with {t
 import itemsContainerTemplate from '../templates/_items-container.hbs' with {type: 'text'}
 // @ts-expect-error "Import attributes are only supported when the --module option is set to esnext, nodenext, or preserve"
 import itemsKeysTemplate from '../templates/_items-keys-container.hbs' with {type: 'text'}
+// @ts-expect-error "Import attributes are only supported when the --module option is set to esnext, nodenext, or preserve"
+import keyCapsulesTemplate from '../templates/_key-capsules.hbs' with {type: 'text'}
 
 import {translateKey} from '../types/key-translations'
 import {InventoryHelper} from './InventoryHelper'
-import {KeyInfo} from '../types/Types'
+import {Inventory, KeyInfo} from '../types/Types'
 import {Utility} from './Utility'
+import {LocalStorageHelper} from './LocalStorageHelper'
 
-// TODO create UI to define capsule names
-const capsuleNames = new Map<string, string>([
-    ['52EF9294', 'Cap Silver'],
-    ['33124ACF', 'Cap Yellow'],
-    ['3C0B9BC3', 'Cap Blue'],
-    ['B517E8AE', 'Cap Green'],
-    ['DB3DE09C', 'Cap Black'],
-    ['FE758180', 'Cap Red'],
-])
+const KEY_STORAGE = 'plugin-kuku-inventory'
 
 Handlebars.registerHelper({
     eachInMap: (map: Map<any, any>, block: HelperOptions) => {
@@ -39,23 +34,35 @@ Handlebars.registerHelper({
     translateKey: (key: string): string => {
         return translateKey(key)
     },
-    capsuleNames: (key: string): string => {
-        return capsuleNames.get(key) ?? key
-    },
     distance: (lat: number, lng: number): string => {
         return Utility.distance(L.latLng(lat, lng))
+    },
+    dump: (context): void => {
+        console.log(context)
+        // return JSON.stringify(context, undefined, 2)
     }
 })
 
 export class DialogHelper {
 
     private inventoryHelper: InventoryHelper
+    private localStorageHelper: LocalStorageHelper
+    private capsuleNames: Map<string, string>
 
     public constructor(
         private pluginName: string,
         private title: string,
     ) {
         this.inventoryHelper = new InventoryHelper()
+        this.localStorageHelper = new LocalStorageHelper(KEY_STORAGE)
+
+        this.capsuleNames = this.localStorageHelper.loadMap('capsuleNames') ?? new Map()
+
+        Handlebars.registerHelper({
+            capsuleNames: (key: string): string => {
+                return this.capsuleNames.get(key) ?? key
+            }
+        })
     }
 
     public getDialog(): JQuery {
@@ -64,6 +71,10 @@ export class DialogHelper {
         const data = {
             plugin: 'window.plugin.' + this.pluginName,
             prefix: this.pluginName,
+            product: {
+                name: this.pluginName,
+                version: VERSION,
+            },
         }
 
         return window.dialog({
@@ -77,7 +88,7 @@ export class DialogHelper {
     }
 
     public showPanel(name: string) {
-        for (const panel of ['Inventory', 'Keys', 'Other', 'Info']) {
+        for (const panel of ['Inventory', 'Keys', 'Other', 'Info', 'Capsules']) {
             const element = document.getElementById(`${this.pluginName}-${panel}-Panel`)
             if (element) element.style.display = 'none'
         }
@@ -90,6 +101,7 @@ export class DialogHelper {
         try {
             await this.inventoryHelper.refresh()
             await this.updateDialog()
+            alert('Inventory has been refreshed.')
         } catch (error) {
             // We probably hit the rate limit...
             console.error(error)
@@ -103,7 +115,8 @@ export class DialogHelper {
             modulators = await this.inventoryHelper.getModsInfo(),
             keys = await this.inventoryHelper.getKeysInfo(),
             cubes = await this.inventoryHelper.getCubesInfo(),
-            boosts = await this.inventoryHelper.getBoostsInfo()
+            boosts = await this.inventoryHelper.getBoostsInfo(),
+            keyCapsules = await this.inventoryHelper.getKeyCapsulesInfo()
 
         let cntEquipment = 0, cntKeys = 0, cntOther = 0
 
@@ -116,11 +129,13 @@ export class DialogHelper {
         cntOther += this.processCubes(cubes)
         cntOther += this.processBoosts(boosts)
 
-        this.UpdateCountField('cntEquipment', cntEquipment)
-        this.UpdateCountField('cntKeys', cntKeys)
-        this.UpdateCountField('cntOther', cntOther)
+        this.processKeyCapsules(keyCapsules)
 
-        this.UpdateCountField('cntTotal', cntEquipment + cntKeys + cntOther)
+        this.updateCountField('cntEquipment', cntEquipment)
+        this.updateCountField('cntKeys', cntKeys)
+        this.updateCountField('cntOther', cntOther)
+
+        this.updateCountField('cntTotal', cntEquipment + cntKeys + cntOther)
 
         this.enableTableSorting('keysTable')
     }
@@ -184,6 +199,20 @@ export class DialogHelper {
         })
     }
 
+    public storeCapsuleNames() {
+        const capsuleNames = this.getCapsuleNames()
+
+        for (const [key, value] of capsuleNames) {
+            if (value) {
+                this.capsuleNames.set(key, value)
+            }
+        }
+
+        this.localStorageHelper.saveMap('capsuleNames', this.capsuleNames)
+
+        alert('Capsule names have been saved - please refresh ;)')
+    }
+
     private parseDistance(distanceStr: string): number {
         const match = /^([\d.]+)\s*(\w+)$/.exec(distanceStr.trim())
 
@@ -203,17 +232,16 @@ export class DialogHelper {
     }
 
     private processResos(resonators: Map<string, number>) {
-        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsImageTemplate)
-        let cntResos = 0
+        this.getContainer('Resonators').innerHTML =
+            Handlebars.compile(itemsImageTemplate)({items: resonators})
 
-        const resosContainer = document.getElementById(this.pluginName + '-Resonators-Container') as Element
-        resosContainer.innerHTML = itemsTemplate({items: resonators})
+        let cntResos = 0
 
         for (const count of resonators.values()) {
             cntResos += count
         }
 
-        this.UpdateCountField('cntResonators', cntResos)
+        this.updateCountField('cntResonators', cntResos)
 
         return cntResos
     }
@@ -221,8 +249,6 @@ export class DialogHelper {
     private processWeapons(weapons: Map<string, number>) {
         const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsImageTemplate)
 
-        const burstersContainer = document.getElementById(this.pluginName + '-Bursters-Container') as Element
-        const strikesContainer = document.getElementById(this.pluginName + '-Strikes-Container') as Element
         const bursters = new Map<string, number>
         const strikes = new Map<string, number>
 
@@ -246,14 +272,14 @@ export class DialogHelper {
 
         const total = cntBursters + cntStrikes + cntFlips
 
-        burstersContainer.innerHTML = itemsTemplate({items: bursters})
-        strikesContainer.innerHTML = itemsTemplate({items: strikes})
+        this.getContainer('Bursters').innerHTML = itemsTemplate({items: bursters})
+        this.getContainer('Strikes').innerHTML = itemsTemplate({items: strikes})
 
-        this.UpdateCountField('cntBursters', cntBursters)
-        this.UpdateCountField('cntStrikes', cntStrikes)
-        this.UpdateCountField('cntFlips', cntFlips)
+        this.updateCountField('cntBursters', cntBursters)
+        this.updateCountField('cntStrikes', cntStrikes)
+        this.updateCountField('cntFlips', cntFlips)
 
-        this.UpdateCountField('cntWeapons', total)
+        this.updateCountField('cntWeapons', total)
 
         return total
     }
@@ -261,9 +287,9 @@ export class DialogHelper {
     private processModulators(modulators: Map<string, number>) {
         const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsImageTemplate)
 
-        const shieldsContainer = document.getElementById(this.pluginName + '-Shields-Container') as Element,
-            hackModsContainer = document.getElementById(this.pluginName + '-HackMods-Container') as Element,
-            otherModsContainer = document.getElementById(this.pluginName + '-OtherMods-Container') as Element,
+        const shieldsContainer = this.getContainer('Shields'),
+            hackModsContainer = this.getContainer('HackMods'),
+            otherModsContainer = this.getContainer('OtherMods'),
             shields = new Map<string, number>,
             hackMods = new Map<string, number>,
             otherMods = new Map<string, number>,
@@ -309,11 +335,11 @@ export class DialogHelper {
 
         const total = cntShields + cntHack + cntOther
 
-        this.UpdateCountField('cntModShields', cntShields)
-        this.UpdateCountField('cntModHack', cntHack)
-        this.UpdateCountField('cntModOther', cntOther)
+        this.updateCountField('cntModShields', cntShields)
+        this.updateCountField('cntModHack', cntHack)
+        this.updateCountField('cntModOther', cntOther)
 
-        this.UpdateCountField('cntMods', total)
+        this.updateCountField('cntMods', total)
 
         return total
     }
@@ -346,10 +372,10 @@ export class DialogHelper {
         boostsPlayContainer.innerHTML = itemsTemplate({items: Utility.sortMapByKey(play, playTypes)})
         boostsBeaconsContainer.innerHTML = itemsTemplate({items: beacons})
 
-        this.UpdateCountField('cntBoostsPlay', cntPlay)
-        this.UpdateCountField('cntBoostsBeacons', cntBeacons)
+        this.updateCountField('cntBoostsPlay', cntPlay)
+        this.updateCountField('cntBoostsBeacons', cntBeacons)
 
-        this.UpdateCountField('cntBoosts', total)
+        this.updateCountField('cntBoosts', total)
 
         return total
     }
@@ -366,16 +392,14 @@ export class DialogHelper {
             count += cnt
         }
 
-        this.UpdateCountField('cntCubes', count)
+        this.updateCountField('cntCubes', count)
 
         return count
     }
 
     private processKeys(keys: Map<string, KeyInfo>) {
-        const template: HandlebarsTemplateDelegate = Handlebars.compile(itemsKeysTemplate)
-        const container = document.getElementById(this.pluginName + '-Keys-Container') as Element
-
-        container.innerHTML = template({items: keys})
+        this.getContainer('Keys').innerHTML =
+            Handlebars.compile(itemsKeysTemplate)({items: keys})
 
         let total = 0, atHand = 0
 
@@ -384,16 +408,45 @@ export class DialogHelper {
             atHand += info.atHand ?? 0
         }
 
-        this.UpdateCountField('cntKeysTotal', total)
-        this.UpdateCountField('cntKeysAtHand', atHand)
-        this.UpdateCountField('cntKeysCapsules', total - atHand)
+        this.updateCountField('cntKeys', total)
 
-        this.UpdateCountField('cntKeys', total)
+        this.updateCountField('cntKeysTotal', total)
+        this.updateCountField('cntKeysAtHand', atHand)
+        this.updateCountField('cntKeysCapsules', total - atHand)
 
         return total
     }
 
-    private UpdateCountField(name: string, count: number) {
+    private processKeyCapsules(keyCapsules: Inventory.KeyCapsule[]) {
+        console.log(this.capsuleNames)
+        console.log(Object.fromEntries(this.capsuleNames))
+        this.getContainer('KeyCapsules').innerHTML =
+            Handlebars.compile(keyCapsulesTemplate)({keyCapsules: keyCapsules, names: Object.fromEntries(this.capsuleNames)})
+    }
+
+    private getCapsuleNames(): Map<string, string> {
+        const names = new Map<string, string>()
+        const inputElements = this.getContainer('KeyCapsules').querySelectorAll('input')
+
+        inputElements.forEach(input => {
+            names.set(input.name, input.value)
+        })
+
+        return names
+    }
+
+
+    private getContainer(name: string): Element {
+        const container = document.getElementById(`${this.pluginName}-${name}-Container`) as Element
+
+        if (!container) {
+            console.warn(`Unknown Container: ${name}`)
+        }
+
+        return container
+    }
+
+    private updateCountField(name: string, count: number): void {
         const element = document.getElementById(this.pluginName + '-' + name) as Element
 
         if (element) {
@@ -402,5 +455,4 @@ export class DialogHelper {
             console.warn(`Unknown countField: ${name}`)
         }
     }
-
 }

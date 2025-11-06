@@ -1,5 +1,6 @@
 import {Inventory, KeyInfo} from '../types/Types'
 import {InventoryFetcher} from './InventoryFetcher'
+import KeyCapsule = Inventory.KeyCapsule;
 
 export class InventoryHelper {
     private inventory: Inventory.Items
@@ -95,6 +96,12 @@ export class InventoryHelper {
         }
 
         return keyInfos
+    }
+
+    public async getKeyCapsulesInfo(): Promise<KeyCapsule[]> {
+        const inventory = await this.getInventory()
+
+        return inventory.keyCapsules
     }
 
     /**
