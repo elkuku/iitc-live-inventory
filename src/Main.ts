@@ -10,7 +10,8 @@ class KuKuInventory implements Plugin.Class {
 
     private dialogHelper: DialogHelper
     private dialog: JQuery | undefined
-  //  private capsuleNames: Map<string, string>
+
+    //  private capsuleNames: Map<string, string>
 
     init() {
         console.log(`${PLUGIN_NAME} ${VERSION}`)
@@ -23,8 +24,6 @@ class KuKuInventory implements Plugin.Class {
         this.createButtons()
 
         // const storedMap = this.loadMapFromLocalStorage('capsuleNames')
-
-
 
 
         /*
@@ -46,17 +45,18 @@ class KuKuInventory implements Plugin.Class {
         */
 
     }
-/*
-    public onSyncInitialized(aaa: unknown, bbb: unknown) {
-        console.log('onSyncInitialized', aaa, bbb)
-        console.log('Sync ready, pushing current data...')
-        console.log('onSyncInitialized', this.syncField)
-        console.log('onSyncInitialized', main.syncField)
-        //  main.setCapsuleName('AAA', 'BBB')
 
-        main.save()
-    }
-*/
+    /*
+        public onSyncInitialized(aaa: unknown, bbb: unknown) {
+            console.log('onSyncInitialized', aaa, bbb)
+            console.log('Sync ready, pushing current data...')
+            console.log('onSyncInitialized', this.syncField)
+            console.log('onSyncInitialized', main.syncField)
+            //  main.setCapsuleName('AAA', 'BBB')
+
+            main.save()
+        }
+    */
     //pluginName, fieldName, null, fullUpdated
     /*
     public onSyncUpdate(pluginName: string, fieldName: string, nullValue: unknown, fullUpdated: boolean) {
@@ -89,14 +89,13 @@ class KuKuInventory implements Plugin.Class {
     public storeCapsuleNames() {
         this.dialogHelper.storeCapsuleNames()
 
-
-        //reload
+        // todo: reload
     }
 
     private createButtons(): void {
         $('#toolbox').append(
             $('<a>', {
-                text: 'KuKuInventory',
+                text: 'KInventory',
                 click: () => this.showDialog()
             })
         )
@@ -112,8 +111,6 @@ class KuKuInventory implements Plugin.Class {
             await this.dialogHelper.updateDialog()
         }
     }
-
-
 
 
     /** Convert Map -> plain object for sync */
@@ -133,14 +130,14 @@ class KuKuInventory implements Plugin.Class {
         return new Map(Object.entries(object))
     }
 */
-/*
-    public setCapsuleName(guid: string, title: string) {
-        this.capsuleNames.set(guid, title)
-        this.saveMapToLocalStorage('capsuleNames', this.capsuleNames)
+    /*
+        public setCapsuleName(guid: string, title: string) {
+            this.capsuleNames.set(guid, title)
+            this.saveMapToLocalStorage('capsuleNames', this.capsuleNames)
 
-       // this.save()
-    }
-*/
+           // this.save()
+        }
+    */
     /** Push changes to Sync plugin */
     /*
     private save() {

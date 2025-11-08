@@ -287,10 +287,7 @@ export class DialogHelper {
     private processModulators(modulators: Map<string, number>) {
         const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsImageTemplate)
 
-        const shieldsContainer = this.getContainer('Shields'),
-            hackModsContainer = this.getContainer('HackMods'),
-            otherModsContainer = this.getContainer('OtherMods'),
-            shields = new Map<string, number>,
+        const shields = new Map<string, number>,
             hackMods = new Map<string, number>,
             otherMods = new Map<string, number>,
             otherModsTypes = [
@@ -323,13 +320,13 @@ export class DialogHelper {
             }
         }
 
-        shieldsContainer.innerHTML = itemsTemplate({
+        this.getContainer('Shields').innerHTML = itemsTemplate({
             items: Utility.sortMapByCompoundKey(shields, ['RES_SHIELD', 'EXTRA_SHIELD'], rarities)
         })
-        hackModsContainer.innerHTML = itemsTemplate({
+        this.getContainer('HackMods').innerHTML = itemsTemplate({
             items: Utility.sortMapByCompoundKey(hackMods, ['HEATSINK', 'MULTIHACK'], rarities)
         })
-        otherModsContainer.innerHTML = itemsTemplate({
+        this.getContainer('OtherMods').innerHTML = itemsTemplate({
             items: Utility.sortMapByKey(otherMods, otherModsTypes)
         })
 
@@ -347,9 +344,7 @@ export class DialogHelper {
     private processBoosts(boosts: Map<string, number>) {
         const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsContainerTemplate)
 
-        const boostsPlayContainer = document.getElementById(this.pluginName + '-Boosts-Play-Container') as Element,
-            boostsBeaconsContainer = document.getElementById(this.pluginName + '-Boosts-Beacons-Container') as Element,
-            play = new Map<string, number>,
+        const play = new Map<string, number>,
             beacons = new Map<string, number>,
             playTypes = ['FRACK', 'APEX', 'BB_BATTLE', 'FW_ENL', 'FW_RES'],
             beaconsTypes = new Set(['MEET', 'TOASTY', 'NIA', 'BN_PEACE', 'BN_BLM', 'RES', 'ENL'])
@@ -369,8 +364,8 @@ export class DialogHelper {
         }
 
         total += cntPlay + cntBeacons
-        boostsPlayContainer.innerHTML = itemsTemplate({items: Utility.sortMapByKey(play, playTypes)})
-        boostsBeaconsContainer.innerHTML = itemsTemplate({items: beacons})
+        this.getContainer('Boosts-Play').innerHTML = itemsTemplate({items: Utility.sortMapByKey(play, playTypes)})
+        this.getContainer('Boosts-Beacons').innerHTML = itemsTemplate({items: beacons})
 
         this.updateCountField('cntBoostsPlay', cntPlay)
         this.updateCountField('cntBoostsBeacons', cntBeacons)
@@ -381,10 +376,8 @@ export class DialogHelper {
     }
 
     private processCubes(cubes: Map<string, number>) {
-        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsContainerTemplate)
-
-        const cubesContainer = document.getElementById(this.pluginName + '-Cubes-Container') as Element
-        cubesContainer.innerHTML = itemsTemplate({items: cubes})
+        this.getContainer('Cubes').innerHTML =
+            Handlebars.compile(itemsContainerTemplate)({items: cubes})
 
         let count = 0
 
@@ -418,10 +411,11 @@ export class DialogHelper {
     }
 
     private processKeyCapsules(keyCapsules: Inventory.KeyCapsule[]) {
-        console.log(this.capsuleNames)
-        console.log(Object.fromEntries(this.capsuleNames))
         this.getContainer('KeyCapsules').innerHTML =
-            Handlebars.compile(keyCapsulesTemplate)({keyCapsules: keyCapsules, names: Object.fromEntries(this.capsuleNames)})
+            Handlebars.compile(keyCapsulesTemplate)({
+                keyCapsules: keyCapsules,
+                names: Object.fromEntries(this.capsuleNames)
+            })
     }
 
     private getCapsuleNames(): Map<string, string> {
@@ -434,7 +428,6 @@ export class DialogHelper {
 
         return names
     }
-
 
     private getContainer(name: string): Element {
         const container = document.getElementById(`${this.pluginName}-${name}-Container`) as Element
