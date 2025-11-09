@@ -10,5 +10,6 @@ Visit the [release page](https://github.com/elkuku/iitc-kuku-inventory/releases/
 
 ----
 
-Images from:
-https://ingress.fandom.com/wiki/Item_Images
+Images from [Ingress Wiki](https://ingress.fandom.com/wiki/Item_Images)
+
+Made with [IITCPluginKit](https://github.com/McBen/IITCPluginKit)
