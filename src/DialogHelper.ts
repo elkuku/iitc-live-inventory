@@ -1,6 +1,3 @@
-import * as Handlebars from 'handlebars'
-import {HelperOptions} from 'handlebars'
-
 // @ts-expect-error "Import attributes are only supported when the --module option is set to esnext, nodenext, or preserve"
 import dialogTemplate from '../templates/dialog.hbs' with {type: 'text'}
 
@@ -15,39 +12,18 @@ import keyCapsulesTemplate from '../templates/_key-capsules.hbs' with {type: 'te
 
 import {translateKey} from '../types/key-translations'
 import {InventoryHelper} from './InventoryHelper'
-import {Inventory, KeyInfo} from '../types/Types'
+import {HelperHandlebars, Inventory, KeyInfo} from '../types/Types'
 import {Utility} from './Utility'
 import {LocalStorageHelper} from './LocalStorageHelper'
 
 const KEY_STORAGE = 'plugin-kuku-inventory'
-
-Handlebars.registerHelper({
-    eachInMap: (map: Map<any, any>, block: HelperOptions) => {
-        let out = ''
-        if (map && map instanceof Map) {
-            for (const [key, value] of map) {
-                out += block.fn({key, value})
-            }
-        }
-        return out
-    },
-    translateKey: (key: string): string => {
-        return translateKey(key)
-    },
-    distance: (lat: number, lng: number): string => {
-        return Utility.distance(L.latLng(lat, lng))
-    },
-    dump: (context): void => {
-        console.log(context)
-        // return JSON.stringify(context, undefined, 2)
-    }
-})
 
 export class DialogHelper {
 
     private inventoryHelper: InventoryHelper
     private localStorageHelper: LocalStorageHelper
     private capsuleNames: Map<string, string>
+    private handlebars: HelperHandlebars
 
     public constructor(
         private pluginName: string,
@@ -57,16 +33,42 @@ export class DialogHelper {
         this.localStorageHelper = new LocalStorageHelper(KEY_STORAGE)
 
         this.capsuleNames = this.localStorageHelper.loadMap('capsuleNames') ?? new Map()
-
-        Handlebars.registerHelper({
-            capsuleNames: (key: string): string => {
-                return this.capsuleNames.get(key) ?? key
-            }
-        })
     }
 
     public getDialog(): JQuery {
-        const template: HandlebarsTemplateDelegate = Handlebars.compile(dialogTemplate)
+        this.handlebars = window.plugin.HelperHandlebars
+
+        if (!this.handlebars) {
+            throw new Error('Handlebars helper not found')
+        }
+
+        // @ts-expect-error 'howtodeclaretypes?'
+        this.handlebars.registerHelper({
+            capsuleNames: (key: string): string => {
+                return this.capsuleNames.get(key) ?? key
+            },
+            eachInMap: (map: Map<any, any>, block: Handlebars.HelperOptions) => {
+                let out = ''
+                if (map && map instanceof Map) {
+                    for (const [key, value] of map) {
+                        out += block.fn({key, value})
+                    }
+                }
+                return out
+            },
+            translateKey: (key: string): string => {
+                return translateKey(key)
+            },
+            distance: (lat: number, lng: number): string => {
+                return Utility.distance(L.latLng(lat, lng))
+            },
+            dump: (context: any): void => {
+                console.log(context)
+                // return JSON.stringify(context, undefined, 2)
+            }
+        })
+
+        const template: Handlebars.TemplateDelegate = this.handlebars.compile(dialogTemplate)
 
         const data = {
             plugin: 'window.plugin.' + this.pluginName,
@@ -233,7 +235,7 @@ export class DialogHelper {
 
     private processResos(resonators: Map<string, number>) {
         this.getContainer('Resonators').innerHTML =
-            Handlebars.compile(itemsImageTemplate)({items: resonators})
+            this.handlebars.compile(itemsImageTemplate)({items: resonators})
 
         let cntResos = 0
 
@@ -247,7 +249,7 @@ export class DialogHelper {
     }
 
     private processWeapons(weapons: Map<string, number>) {
-        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsImageTemplate)
+        const itemsTemplate: HandlebarsTemplateDelegate = this.handlebars.compile(itemsImageTemplate)
 
         const bursters = new Map<string, number>
         const strikes = new Map<string, number>
@@ -285,7 +287,7 @@ export class DialogHelper {
     }
 
     private processModulators(modulators: Map<string, number>) {
-        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsImageTemplate)
+        const itemsTemplate: HandlebarsTemplateDelegate = this.handlebars.compile(itemsImageTemplate)
 
         const shields = new Map<string, number>,
             hackMods = new Map<string, number>,
@@ -342,7 +344,7 @@ export class DialogHelper {
     }
 
     private processBoosts(boosts: Map<string, number>) {
-        const itemsTemplate: HandlebarsTemplateDelegate = Handlebars.compile(itemsContainerTemplate)
+        const itemsTemplate: HandlebarsTemplateDelegate = this.handlebars.compile(itemsContainerTemplate)
 
         const play = new Map<string, number>,
             beacons = new Map<string, number>,
@@ -377,7 +379,7 @@ export class DialogHelper {
 
     private processCubes(cubes: Map<string, number>) {
         this.getContainer('Cubes').innerHTML =
-            Handlebars.compile(itemsContainerTemplate)({items: cubes})
+            this.handlebars.compile(itemsContainerTemplate)({items: cubes})
 
         let count = 0
 
@@ -392,7 +394,7 @@ export class DialogHelper {
 
     private processKeys(keys: Map<string, KeyInfo>) {
         this.getContainer('Keys').innerHTML =
-            Handlebars.compile(itemsKeysTemplate)({items: keys})
+            this.handlebars.compile(itemsKeysTemplate)({items: keys})
 
         let total = 0, atHand = 0
 
@@ -412,7 +414,7 @@ export class DialogHelper {
 
     private processKeyCapsules(keyCapsules: Inventory.KeyCapsule[]) {
         this.getContainer('KeyCapsules').innerHTML =
-            Handlebars.compile(keyCapsulesTemplate)({
+            this.handlebars.compile(keyCapsulesTemplate)({
                 keyCapsules: keyCapsules,
                 names: Object.fromEntries(this.capsuleNames)
             })
