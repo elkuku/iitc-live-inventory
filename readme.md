@@ -4,6 +4,8 @@ A plugin for [IITC](https://iitc.app) to display the agents inventory (CORE requ
 
 <img alt="Image" src="https://github.com/user-attachments/assets/aacbb924-fca8-4196-a3f9-e0b2507d999f" />
 
+If you wonder why this looks so gorgeous (and green)... it's because of the fact that I am using the awesome [Blur Theme](https://github.com/Falenone/Blurtheme)
+
 ## Installation
 
 Visit the [release page](https://github.com/elkuku/iitc-kuku-inventory/releases/latest) and install the `user.js` file
