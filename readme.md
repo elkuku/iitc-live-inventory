@@ -8,7 +8,12 @@ If you wonder why this looks so gorgeous (and green)... it's because of the fact
 
 ## Installation
 
-Visit the [release page](https://github.com/elkuku/iitc-kuku-inventory/releases/latest) and install the `user.js` file
+First install the required helper plugin:
+
+* Template Helper: [iitc_plugin_helper_handlebars.user.js
+  ](https://github.com/elkuku/iitc-kuku-helper-handlebars/releases/latest)
+
+Then visit the [release page](https://github.com/elkuku/iitc-kuku-inventory/releases/latest) and install the `user.js` file
 
 
 ----
